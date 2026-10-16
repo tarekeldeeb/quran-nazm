@@ -3,35 +3,52 @@
 **Quran-Nazm** (نظم, "arrangement") is an automatic, rule-based typesetter for the Quran. It sets the Hafs text in [DigitalKhatt](https://digitalkhatt.org)'s Madina font and replaces the manual layout of the printed Mushaf with explicit rules, so every page and every line follows the same logic.
 
 <p align="center">
-  <img src="figures/renders/page-002.png" width="32%" alt="Quran-Nazm page 2">
-  <img src="figures/renders/page-001.png" width="32%" alt="Quran-Nazm page 1">
+  <img src="figures/renders/compare-156.png" width="80%" alt="Page 156 in Quran-Nazm (left) and in the Madina 1441H print (right)">
+  <br><sub>Page 156 (Al-A'raf 44 onward): Quran-Nazm on the left, the Madina 1441H print on the right.</sub>
 </p>
+
+## Why
+
+Every Mushaf starts from the same problem: the traditional reading units are unequal. The longest rub' holds 2.19× the text of the shortest, hizbs differ by 1.35× and even juz by 1.16×. Fixing a unit to a page count means absorbing that variance somewhere.
+
+- **The Madina Mushaf** fixes each juz to 20 pages, the most forgiving unit, and absorbs the rest by hand. Measured on the 1441H print, a full line holds anywhere from 4 to 15 words, a third of all lines are more than 10% too long or too short for the line width, and pen weight drifts from line to line and page to page.
+- **Quran-Nazm** fixes the stricter unit, every hizb on exactly 10 pages, and absorbs the variance by rule. It keeps the hand and makes the setting even: lines on a page vary 38% less than in the print (0.039 vs 0.063), every hizb begins on a known page, and the pen is the same on every line.
+
+Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the paper in [`paper/`](paper/).
 
 ## The rules
 
 - **Every hizb fills exactly 10 pages** of 15 lines; juz 30, the one exception, fills 24.
 - **Every page ends with an ayah number**, and no line starts with an ayah marker.
-- **Each hizb is set as one unstretched line**, cut into 10 equal pages at ayah ends, then each page into 15 equal lines at word boundaries.
-- **Every surah starts on a new line** under its header, and short surahs are kept whole on one page.
+- **Each hizb is set as one unstretched line**, cut into 10 equal pages at ayah ends, then each page into 15 equal lines at word boundaries. Both sets of cuts are chosen jointly by dynamic programming.
+- **Every surah starts on a new line** under its header, and short surahs are kept whole on one page wherever page balance allows.
 - **One line width for the whole book.** Lines stretch with DigitalKhatt's letter elongation, and compress by at most 25%.
-
-## Why
-
-Measured on the King Fahd Complex 1441H print, the same line width holds anywhere from 4 to 15 words. A third of all lines are more than 10% too long or too short for it, and pen weight drifts from line to line and page to page. Quran-Nazm keeps the hand and makes the setting even: lines on a page vary 40% less than in the print (0.039 vs 0.065), every hizb begins at a predictable place, and the pen is the same on every line.
-
-Full evidence and decisions: [`docs/findings.md`](docs/findings.md).
+- **No word may touch its neighbour.** Every line is checked for ink contact, and touching words get a little more space.
 
 ## Output
 
-[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages, 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print.
+[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages (the same count as the print), 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print. [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
 
 To generate it yourself, see [`docs/RENDERING.md`](docs/RENDERING.md). In short:
 
 ```bash
 git clone -b v2.0 https://github.com/tarekeldeeb/quran-madina-html.git ../quran-madina-html
-pip install uharfbuzz fonttools brotli numpy
+pip install uharfbuzz fonttools brotli numpy freetype-py
 python scripts/00_prepare.py
 python scripts/render_mushaf.py
+```
+
+## Paper
+
+**Quran-Nazm: Reducing Layout Variance in Quran Typesetting**, Tarek Eldeeb. Full paper in the ACM format (9 pages), aimed at the ACM Symposium on Document Engineering (DocEng). Sources, figures and build instructions are in [`paper/`](paper/), and the compiled PDF is [`paper/main.pdf`](paper/main.pdf).
+
+```bibtex
+@misc{eldeeb2026nazm,
+  author       = {Tarek Eldeeb},
+  title        = {Quran-Nazm: Reducing Layout Variance in Quran Typesetting},
+  year         = {2026},
+  howpublished = {\url{https://github.com/tarekeldeeb/quran-nazm}}
+}
 ```
 
 ## Repository
@@ -40,7 +57,7 @@ python scripts/render_mushaf.py
 |---|---|
 | `scripts/render_mushaf.py` | the typesetter: layout and PDF writer |
 | `scripts/00_prepare.py` | extracts fonts (and scan pages, for the analysis) |
-| `scripts/10_*` … `scripts/64_*` | the research scripts behind each finding, numbered by stage |
+| `scripts/10_*` … `scripts/66_*` | the research scripts behind each finding and the paper's ablations, numbered by stage |
 | `docs/findings.md` | measurements, comparisons and decisions |
 | `docs/RENDERING.md` | how to generate the PDF, step by step |
 | `docs/madina-variance-evidence.html` | evidence document: line density, pen weight, ayah markers in the Madina print |
@@ -48,7 +65,7 @@ python scripts/render_mushaf.py
 | `figures/` | crops of the Madina print used as evidence, and sample Nazm pages |
 | `data/` | rub' boundaries and derived measurements |
 | `output/` | the rendered PDF, its statistics report and the full page layout |
-| `paper/` | LaTeX sources and PDF of the article introducing Quran-Nazm |
+| `paper/` | the paper: LaTeX sources (ACM `acmart`), figures, build script and PDF |
 
 ## License
 
@@ -58,4 +75,5 @@ Dual-licensed: free for non-commercial use under the [Waqf Public License 2.0](h
 
 - Text, layout data, fonts and justifier: [quran-madina-html](https://github.com/tarekeldeeb/quran-madina-html), which builds on [DigitalKhatt](https://github.com/DigitalKhatt) by Amine Anane and on the [Tanzil](https://tanzil.net) text.
 - Rub' boundaries: [quran-meta](https://www.npmjs.com/package/quran-meta) (MIT).
+- Running heads and page numbers: [Amiri Quran](https://www.amirifont.org) by Khaled Hosny.
 - Madina Mushaf images in `figures/` are crops of the King Fahd Complex for the Printing of the Holy Quran edition, reproduced for analysis.

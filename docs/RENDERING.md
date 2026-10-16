@@ -7,7 +7,7 @@ This guide rebuilds `output/quran-nazm.pdf` from scratch. A full run takes about
 | Requirement | Why |
 |---|---|
 | Python 3.10 or newer | runs the scripts |
-| `pip install uharfbuzz fonttools brotli numpy` | text shaping, font reading (WOFF2 needs `brotli`) |
+| `pip install uharfbuzz fonttools brotli numpy freetype-py` | text shaping, font reading (WOFF2 needs `brotli`; quran-madina-html's justifier needs `freetype-py`) |
 | A checkout of [quran-madina-html](https://github.com/tarekeldeeb/quran-madina-html) on its `v2.0` branch | provides the 1441H text and line data, the patched DigitalKhatt New Madina font, Amiri Quran, and the HarfBuzz justifier (`src/db/v2/justify.py`) |
 
 Only the analysis scripts that measure the printed Mushaf also need `pymupdf`, `opencv-python-headless` and `scikit-image`, plus the King Fahd Complex PDF. The renderer does not.
@@ -18,7 +18,7 @@ Only the analysis scripts that measure the printed Mushaf also need `pymupdf`, `
 git clone https://github.com/tarekeldeeb/quran-nazm.git
 git clone -b v2.0 https://github.com/tarekeldeeb/quran-madina-html.git
 cd quran-nazm
-pip install uharfbuzz fonttools brotli numpy
+pip install uharfbuzz fonttools brotli numpy freetype-py
 ```
 
 The scripts find their inputs through three environment variables (see `scripts/paths.py`):
