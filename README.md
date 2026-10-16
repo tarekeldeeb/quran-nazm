@@ -9,10 +9,10 @@
 
 ## The rules
 
-- **Every hizb fills exactly 10 pages** of 15 lines (juz 30 is the one exception).
+- **Every hizb fills exactly 10 pages** of 15 lines; juz 30, the one exception, fills 24.
 - **Every page ends with an ayah number**, and no line starts with an ayah marker.
 - **Each hizb is set as one unstretched line**, cut into 10 equal pages at ayah ends, then each page into 15 equal lines at word boundaries.
-- **Every surah starts on a new line** under its header.
+- **Every surah starts on a new line** under its header, and short surahs are kept whole on one page.
 - **One line width for the whole book.** Lines stretch with DigitalKhatt's letter elongation, and compress by at most 25%.
 
 ## Why
@@ -23,7 +23,7 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md).
 
 ## Output
 
-[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 607 pages, 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print.
+[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages, 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print.
 
 To generate it yourself, see [`docs/RENDERING.md`](docs/RENDERING.md). In short:
 
@@ -48,6 +48,10 @@ python scripts/render_mushaf.py
 | `figures/` | crops of the Madina print used as evidence, and sample Nazm pages |
 | `data/` | rub' boundaries and derived measurements |
 | `output/` | the rendered PDF, its statistics report and the full page layout |
+
+## License
+
+Dual-licensed: free for non-commercial use under the [Waqf Public License 2.0](https://github.com/ojuba-org/waqf/tree/master/2.0); any commercial use needs prior written permission. See [`LICENSE`](LICENSE). The licence covers this project's own code, documents and renders; third-party material keeps its own terms (see Credits).
 
 ## Credits
 

@@ -177,24 +177,38 @@ def hizb_ranges():
     return [(starts[1 + 4 * h], starts[1 + 4 * h + 4] if h < 59 else 6237) for h in range(60)]
 
 
-def fixed_hizb_pages(txt, ayahs):
-    """Nine page cuts at ayah ends, chosen together so every page holds the same
-    share of the hizb (surah header lines counted as one line of text each)."""
+SMALL_SURA_PENALTY = 0.6  # cost of cutting a page inside a surah that fits on one page
+
+
+def fixed_pages(txt, ayahs, pages):
+    """Cut a run of ayahs into exactly `pages` pages at ayah ends, all cuts chosen
+    together so every page holds the same share of text (a surah header counts as
+    the lines it uses). Cutting inside a surah short enough to fit on one page is
+    penalised, so short surahs stay whole on a page whenever the balance allows."""
     w = [sum(x for _, x in txt.units(s, a)) + txt.sp * len(txt.units(s, a)) for s, a in ayahs]
     hdr = [header_lines(s) if a == 1 else 0 for s, a in ayahs]
-    q = sum(w) / (PAGES_PER_HIZB * LINES - sum(hdr))
+    q = sum(w) / (pages * LINES - sum(hdr))
     v = np.concatenate([[0], np.cumsum(np.array(w) + np.array(hdr) * q)])
-    target = v[-1] / PAGES_PER_HIZB
-    n, P, INF = len(ayahs), PAGES_PER_HIZB, 1e30
+    target = v[-1] / pages
+    # penalty for a cut after ayah i-1 (i.e. at position i) inside a short surah
+    span = {}
+    for i, (s, a) in enumerate(ayahs):
+        span.setdefault(s, [i, i])[1] = i
+    pen = np.zeros(len(ayahs) + 1)
+    for s, (i0, i1) in span.items():
+        whole = ayahs[i0][1] == 1 and ayahs[i1][1] == len(txt.suras[s - 1]["ayas"])
+        if whole and v[i1 + 1] - v[i0] <= target:
+            pen[i0 + 1:i1 + 1] = SMALL_SURA_PENALTY * target ** 2
+    n, P, INF = len(ayahs), pages, 1e30
     best = np.full((P + 1, n + 1), INF)
     back = np.zeros((P + 1, n + 1), int)
     best[0][0] = 0
     for k in range(1, P + 1):
         for i in range(k, n - (P - k) + 1):
-            for j in range(max(k - 1, i - 150), i):
+            for j in range(max(k - 1, i - 200), i):
                 if best[k - 1][j] >= INF:
                     continue
-                c = best[k - 1][j] + (v[i] - v[j] - target) ** 2
+                c = best[k - 1][j] + (v[i] - v[j] - target) ** 2 + (pen[i] if i < n else 0)
                 if c < best[k][i]:
                     best[k][i], back[k][i] = c, j
     cuts, k = [n], P
@@ -215,28 +229,71 @@ def lines_needed(ws, width, sp):
     return n
 
 
-def flowing_pages(txt, ayahs, W):
-    """Juz 30: fill pages in sequence at line width W; a page closes before an
-    ayah (with its surah header, if any) that would no longer fit."""
-    pages, cur = [], []
+JUZ30_PAGES = 24
+SPLIT_SHORT_SURA = 25.0  # juz 30: cost of splitting a surah that fits on one page (vs. ~0.01 for a typical page)
 
-    def need(group):
-        segs, total = [], 0
-        for s, a in group:
+
+def juz30_pages(txt, ayahs, pages, W, shrink):
+    """Juz 30 on exactly `pages` pages. Its many short surahs each start on a new
+    line, so a page is scored by the lines it really needs at width W: every
+    surah segment is cut separately, and the page's average stretch should be
+    close to 1. A page must fit within the shrink limit; splitting a surah that
+    could fit on one page costs far more than any imbalance."""
+    n = len(ayahs)
+    units = [[w for _, w in txt.units(s, a)] for s, a in ayahs]
+    sura_len = {}
+    for i, (s, a) in enumerate(ayahs):
+        sura_len.setdefault(s, []).append(i)
+    small = set()
+    for s, idx in sura_len.items():
+        ws = [w for i in idx for w in units[i]]
+        if header_lines(s) + lines_needed(ws, W, txt.sp) <= LINES:
+            small.add(s)
+    cap = W / (1 - shrink)
+
+    def page_cost(j, i):  # ayahs j..i-1 on one page
+        segs = []
+        for k in range(j, i):
+            s, a = ayahs[k]
             if a == 1 or not segs:
                 segs.append([header_lines(s) if a == 1 else 0, []])
-            segs[-1][1] += [w for _, w in txt.units(s, a)]
-        for h, ws in segs:
-            total += h + lines_needed(ws, W, txt.sp)
-        return total
+            segs[-1][1] += units[k]
+        heads = sum(h for h, _ in segs)
+        if heads + sum(lines_needed(ws, cap, txt.sp) for _, ws in segs) > LINES:
+            return None  # cannot fit even at the shrink limit
+        text = sum(sum(ws) + txt.sp * len(ws) for _, ws in segs)
+        avail = LINES - heads
+        if avail < len(segs):
+            return None
+        return math.log(avail * W / text) ** 2
 
-    for sa in ayahs:
-        if cur and need(cur + [sa]) > LINES:
-            pages.append(cur)
-            cur = []
-        cur.append(sa)
-    pages.append(cur)
-    return pages, need(pages[-1])
+    INF = 1e30
+    cost = {}
+    for j in range(n):
+        for i in range(j + 1, min(n, j + 90) + 1):
+            c = page_cost(j, i)
+            if c is None:
+                break
+            if i < n:
+                s_prev, s_next = ayahs[i - 1][0], ayahs[i][0]
+                if s_prev == s_next and s_prev in small:
+                    c += SPLIT_SHORT_SURA
+            cost[j, i] = c
+    best = np.full((pages + 1, n + 1), INF)
+    back = np.zeros((pages + 1, n + 1), int)
+    best[0][0] = 0
+    for k in range(1, pages + 1):
+        for (j, i), c in cost.items():
+            if best[k - 1][j] < INF and best[k - 1][j] + c < best[k][i]:
+                best[k][i], back[k][i] = best[k - 1][j] + c, j
+    if best[pages][n] >= INF:
+        raise SystemExit(f"juz 30 does not fit on {pages} pages within a {shrink:.0%} shrink limit")
+    cuts, k = [n], pages
+    while k:
+        cuts.append(back[k][cuts[-1]])
+        k -= 1
+    cuts = cuts[::-1]
+    return [ayahs[a:b] for a, b in zip(cuts[:-1], cuts[1:])]
 
 
 def build_layout(txt, shrink):
@@ -244,20 +301,32 @@ def build_layout(txt, shrink):
     book = []  # list of dict(hizb, ayahs, rows)
     for h in range(58):
         a0, a1 = ranges[h]
-        for pa in fixed_hizb_pages(txt, txt.flat[a0 - 1:a1 - 1]):
+        for pa in fixed_pages(txt, txt.flat[a0 - 1:a1 - 1], PAGES_PER_HIZB):
             book.append(dict(hizb=h + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
+    # Juz 30, the exception: both hizbs together on a fixed number of pages
     a0, a1 = ranges[58][0], ranges[59][1]
-    jz, last_need = flowing_pages(txt, txt.flat[a0 - 1:a1 - 1], W)
     hz60 = ranges[59][0]
-    for i, pa in enumerate(jz):
-        last = i == len(jz) - 1
-        heads = sum(header_lines(s) for s, a in pa if a == 1)
-        rows = page_rows(txt, pa, n_lines=(last_need - heads) if last else None)
+    for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES, W, shrink):
         idx = txt.flat.index(pa[0]) + 1
-        book.append(dict(hizb=59 if idx < hz60 else 60, ayahs=pa, rows=rows))
+        book.append(dict(hizb=59 if idx < hz60 else 60, ayahs=pa, rows=page_rows(txt, pa)))
     return book, W, longest
+
+
+def split_short_suras(txt, book):
+    """Surahs short enough for one page that still span two pages."""
+    pages_of = {}
+    for i, p in enumerate(book):
+        for s, a in p["ayahs"]:
+            pages_of.setdefault(s, set()).add(i)
+    out = []
+    for s, pg in pages_of.items():
+        if len(pg) > 1:
+            n = len(txt.suras[s - 1]["ayas"])
+            w = sum(x for a in range(1, n + 1) for _, x in txt.units(s, a))
+            out.append((s, w))
+    return out
 
 
 # --------------------------------------------------------------------- PDF
@@ -374,6 +443,58 @@ def rounded_rect(x, y, w, h, r):
             f"{x:.2f} {y+r:.2f} l {x:.2f} {y+r-k:.2f} {x+r-k:.2f} {y:.2f} {x+r:.2f} {y:.2f} c h")
 
 
+def star8(cx, cy, r):
+    """Eight-pointed star (two overlapping squares), as a filled path."""
+    ops = []
+    for rot in (0, math.pi / 4):
+        pts = [(cx + r * math.cos(rot + i * math.pi / 2), cy + r * math.sin(rot + i * math.pi / 2)) for i in range(4)]
+        ops.append(f"{pts[0][0]:.2f} {pts[0][1]:.2f} m " + " ".join(f"{x:.2f} {y:.2f} l" for x, y in pts[1:]) + " h")
+    return " ".join(ops)
+
+
+def circle(cx, cy, r):
+    k = 0.5523 * r
+    return (f"{cx+r:.2f} {cy:.2f} m {cx+r:.2f} {cy+k:.2f} {cx+k:.2f} {cy+r:.2f} {cx:.2f} {cy+r:.2f} c "
+            f"{cx-k:.2f} {cy+r:.2f} {cx-r:.2f} {cy+k:.2f} {cx-r:.2f} {cy:.2f} c "
+            f"{cx-r:.2f} {cy-k:.2f} {cx-k:.2f} {cy-r:.2f} {cx:.2f} {cy-r:.2f} c "
+            f"{cx+k:.2f} {cy-r:.2f} {cx+r:.2f} {cy-k:.2f} {cx+r:.2f} {cy:.2f} c h")
+
+
+def cartouche(cx, cy, a, b):
+    """Panel with pointed, gently curved ends: half-width a, half-height b."""
+    t = b * 1.6
+    return (f"{cx-a+t:.2f} {cy+b:.2f} m {cx+a-t:.2f} {cy+b:.2f} l "
+            f"{cx+a-t*0.45:.2f} {cy+b:.2f} {cx+a-t*0.2:.2f} {cy+b*0.35:.2f} {cx+a:.2f} {cy:.2f} c "
+            f"{cx+a-t*0.2:.2f} {cy-b*0.35:.2f} {cx+a-t*0.45:.2f} {cy-b:.2f} {cx+a-t:.2f} {cy-b:.2f} c "
+            f"{cx-a+t:.2f} {cy-b:.2f} l "
+            f"{cx-a+t*0.45:.2f} {cy-b:.2f} {cx-a+t*0.2:.2f} {cy-b*0.35:.2f} {cx-a:.2f} {cy:.2f} c "
+            f"{cx-a+t*0.2:.2f} {cy+b*0.35:.2f} {cx-a+t*0.45:.2f} {cy+b:.2f} {cx-a+t:.2f} {cy+b:.2f} c h")
+
+
+def surah_header_art(x0, width, cy, h):
+    """Surah header band: a pale ribbon between two fine rules, a central cartouche
+    with a double outline for the title, and an eight-pointed star at each end."""
+    g, p = rgb(GREEN), rgb(PALE)
+    gs = rgb(GREEN, True)
+    rib = h * 0.26
+    star_r = h * 0.36
+    sx1, sx2 = x0 + star_r + 2, x0 + width - star_r - 2
+    a, b = width * 0.29, h * 0.42
+    cx = x0 + width / 2
+    ops = [f"q {p} {sx1:.2f} {cy-rib:.2f} {sx2-sx1:.2f} {2*rib:.2f} re f",
+           f"{gs} 0.5 w {sx1:.2f} {cy+rib:.2f} m {sx2:.2f} {cy+rib:.2f} l S {sx1:.2f} {cy-rib:.2f} m {sx2:.2f} {cy-rib:.2f} l S"]
+    for d in (-1, 1):  # small diamonds on the ribbon, halfway between star and cartouche
+        mx = cx + d * (a + (width / 2 - a - star_r) / 2)
+        r = rib * 0.55
+        ops.append(f"{g} {mx:.2f} {cy+r:.2f} m {mx+r:.2f} {cy:.2f} l {mx:.2f} {cy-r:.2f} l {mx-r:.2f} {cy:.2f} l h f")
+    ops.append(f"{p} {cartouche(cx, cy, a, b)} f {gs} 1.1 w {cartouche(cx, cy, a, b)} S")
+    ops.append(f"{gs} 0.45 w {cartouche(cx, cy, a - 2.6, b - 2.6)} S")
+    for sx in (sx1, sx2):
+        ops.append(f"{g} {star8(sx, cy, star_r)} f {p} {circle(sx, cy, star_r * 0.42)} f {g} {circle(sx, cy, star_r * 0.16)} f")
+    ops.append("Q")
+    return " ".join(ops)
+
+
 def place(glyphs, x, y, k, xs, used, out, prefix="G"):
     for gid, gx, gy in glyphs:
         if gid == 0:
@@ -421,11 +542,10 @@ def render_page(pdf, txt, page, number, W, stats):
         ytop = top - i * pitch
         base = ytop - BASELINE_IN_ROW * pitch
         if row[0] == "title":
-            out.append(f"Q q {rgb(PALE)} {rounded_rect(x0 + 6, ytop - pitch + 5, BLOCK_W - 12, pitch - 10, 5)} f "
-                       f"{rgb(GREEN, True)} 0.9 w {rounded_rect(x0 + 6, ytop - pitch + 5, BLOCK_W - 12, pitch - 10, 5)} S Q q {rgb(INK)}")
+            out.append("Q " + surah_header_art(x0, BLOCK_W, ytop - pitch / 2, pitch) + f" q {rgb(INK)}")
             g, w = plain(txt, txt.suras[row[1] - 1]["title"])
-            s = 0.85 * k
-            place(g, x0 + BLOCK_W / 2 - w * s / 2, base + 1, s, 1.0, used, out)
+            s = 0.8 * k
+            place(g, x0 + BLOCK_W / 2 - w * s / 2, ytop - pitch / 2 - 0.22 * pitch, s, 1.0, used, out)
             pdf.outlines.append((txt.suras[row[1] - 1]["title"], len(pdf.pages)))
             continue
         if row[0] == "basmala":
@@ -485,6 +605,9 @@ def main():
                squeeze_max=round(float(1 - xs.min()), 3), centred_lines=stats["centred"],
                every_page_ends_on_ayah=ends_ok, no_line_starts_with_marker=starts_ok,
                juz30_pages=sum(1 for p in book if p["hizb"] >= 59),
+               short_suras_split=[sn for sn, w in split_short_suras(txt, book)
+                                  if header_lines(sn) + lines_needed([x for a in range(1, len(txt.suras[sn - 1]["ayas"]) + 1)
+                                                                      for _, x in txt.units(sn, a)], W, txt.sp) <= LINES],
                within_page_spread=round(float(np.median([np.std(np.log([W / r[2] for r in p["rows"] if r[0] == "text" and W / r[2] <= 1.8]))
                                                          for p in book if p["hizb"] <= 58])), 3),
                within_page_spread_madina_1441h=0.065)

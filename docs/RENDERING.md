@@ -49,7 +49,7 @@ Output, in `build/`:
 
 | File | Content |
 |---|---|
-| `quran-nazm.pdf` | the Mushaf: 607 pages, 145 × 210 mm, vector outlines, one bookmark per surah, right-to-left page order |
+| `quran-nazm.pdf` | the Mushaf: 604 pages, 145 × 210 mm, vector outlines, one bookmark per surah, right-to-left page order |
 | `quran-nazm-report.json` | type size, stretch and compression statistics, and the rule checks |
 | `quran-nazm-layout.json` | every page: hizb, first and last ayah, and the words on each line |
 
@@ -71,12 +71,13 @@ The layout is always computed for the whole book, because the common line width 
 5. **Fifteen lines.** On each page, every surah starts on a new line under its header. The remaining lines are shared among the page's surah segments so that none is crowded, and each segment is cut into lines at word boundaries, all cuts chosen together to make the lines as equal as possible.
 6. **One line width.** After all hizbs 1–58 are laid out, the longest natural line in the book is found. The common line width is that length reduced by the shrink limit (25%), so no line ever needs more than 25% compression. This sets the type size: 93% of the Madina 1441H print.
 7. **Justification.** Each line is justified to the common width with the DigitalKhatt rules ported in quran-madina-html v2: short lines stretch letters (kashida and alternates) and spaces; long lines tighten spaces, use the font's narrow forms, and only then scale horizontally. The few lines that would need more than 1.8× stretch (a handful of words left before a surah ends on a page) are centred instead.
-8. **Juz 30.** Hizbs 59–60 are the declared exception: their many short surahs make a fixed page count impossible, so their pages are filled in sequence at the same width and type size, still ending on ayahs. The last page is not stretched to fill.
-9. **PDF.** Every glyph outline is written once as a PDF form object and placed on each page by position, which keeps the 607-page file near 10 MB with sharp vector text at any zoom.
+8. **Juz 30.** Hizbs 59–60 are the declared exception and share exactly 24 pages. With 37 surahs, each starting on a new line under its header, text length is a poor guide to how full a page is, so every candidate page is scored by the lines it really needs at the common width: its average stretch should be close to 1, and it may never need more than the shrink limit. A cut inside a surah that would fit on one page costs far more than any imbalance, so short surahs stay whole wherever the 24 pages allow. Change `JUZ30_PAGES` in the script for another count.
+9. **Surah headers.** Each header is vector art drawn directly in the PDF: a pale ribbon between two fine rules, a cartouche with pointed ends and a double outline holding the surah name (set in the same DigitalKhatt font), a diamond on each side and an eight-pointed star at each end. Running heads and page numbers use Amiri Quran, whose digits read well at small sizes.
+10. **PDF.** Every glyph outline is written once as a PDF form object and placed on each page by position, which keeps the 604-page file near 10 MB with sharp vector text at any zoom.
 
 ## 6. Checks
 
-The report confirms two rules on every page: `every_page_ends_on_ayah` and `no_line_starts_with_marker` must both be `true`. It also records how many lines needed a horizontal squeeze (`lines_squeezed`), the one visible compromise at a 25% limit; see `docs/findings.md`.
+The report confirms two rules on every page: `every_page_ends_on_ayah` and `no_line_starts_with_marker` must both be `true`. It also records how many lines needed a horizontal squeeze (`lines_squeezed`), the one visible compromise at a 25% limit, and lists any surah short enough for one page that still spans two (`short_suras_split`); see `docs/findings.md`.
 
 ## 7. Reproducing the research
 
