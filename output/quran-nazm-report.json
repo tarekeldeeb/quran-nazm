@@ -1,0 +1,20 @@
+{
+ "pages": 607,
+ "rendered": "1-607",
+ "shrink_limit": 0.25,
+ "line_width_units": 16601,
+ "type_size_vs_madina": 0.93,
+ "stretch_median": 1.076,
+ "stretch_p5": 0.899,
+ "stretch_p95": 1.291,
+ "stretch_max": 1.79,
+ "lines_compressed": 0.251,
+ "lines_squeezed": 0.132,
+ "squeeze_max": 0.218,
+ "centred_lines": 18,
+ "every_page_ends_on_ayah": true,
+ "no_line_starts_with_marker": true,
+ "juz30_pages": 27,
+ "within_page_spread": 0.039,
+ "within_page_spread_madina_1441h": 0.065
+}
