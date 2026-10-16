@@ -107,21 +107,29 @@ Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hol
 On the scanned pages (720\,\x\,1123\,px, about 100\,ppi) we split each page into its 15 line bands, masked the coloured ayah markers, upsampled each band four times and measured the mean pen width as ink area divided by skeleton length. Over 7{,}320 lines on the 488 pages made only of text:
 \begin{itemize}
   \item a heavy line has a 13\% thicker stroke than a light one (5th to 95th percentile), and the spread inside one page is typically 9\%;
-  \item on page~102, line~5 is 16\% heavier than line~4 directly above it, and page~561 is 19\% heavier than page~563 (Fig.~\ref{fig:crops});
-  \item weight follows crowding (Fig.~\ref{fig:weight}): sparse lines, which were stretched, are written with 6\% thicker strokes than crowded ones, and ink per letter spans 1.36\x{} and correlates with crowding at $r=-0.61$.
+  \item on page~102, line~5 is 16\% heavier than line~4 directly above it, and page~561 is 19\% heavier than page~563 (Fig.~\ref{fig:crops}(a,b));
+  \item weight follows crowding (Fig.~\ref{fig:weight}): sparse lines, which were stretched, are written with 6\% thicker strokes than crowded ones, and ink per letter spans 1.36\x{} and correlates with crowding at $r=-0.61$. On page~192 a five-word line carries 65\% more ink per letter than a ten-word line of the same page (Fig.~\ref{fig:crops}(c)).
 \end{itemize}
 The likely mechanism is scaling of written words to fit: a line scaled up gains stroke weight as well as length. At this resolution a stroke is about two pixels wide, so we read these figures as relative differences; the crops show that they are visible.
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
-  \includegraphics[width=\linewidth]{figures/madina-02-p-102-line-4.png}\\[1pt]
-  \includegraphics[width=\linewidth]{figures/madina-03-p-102-line-5.png}\\[1pt]
-  {\footnotesize (a) Page 102, lines 4 and 5: pen width 2.11 vs 2.45\,px.}\\[4pt]
-  \includegraphics[width=\linewidth]{figures/madina-08-p-567-lines-2-3-ayah-marker-split.png}\\[1pt]
-  {\footnotesize (b) Page 567, lines 2--3: ayah 11 ends on line 2, its marker opens line 3.}
-  \caption{Crops of the 1441\,H print at native resolution.}
+  \newcommand{\crop}[2]{\includegraphics[width=\linewidth]{figures/#1}\\[-1pt]{\scriptsize #2}\\[3pt]}
+  \newcommand{\panel}[2]{\begin{minipage}[b]{0.485\textwidth}\centering #1{\footnotesize #2}\end{minipage}}
+  \panel{\crop{madina-02-p-102-line-4.png}{p.\,102, line 4: pen 2.11\,px, 93\,px$^2$ ink per letter}%
+         \crop{madina-03-p-102-line-5.png}{p.\,102, line 5: pen 2.45\,px (+16\%), 122\,px$^2$ ink per letter}}%
+        {(a) Neighbouring lines written with different pens.}\hfill
+  \panel{\crop{madina-04-p-561-line-9.png}{p.\,561, line 9: pen 2.85\,px, the heaviest page measured}%
+         \crop{madina-05-p-563-line-9.png}{p.\,563, line 9: pen 2.14\,px, two pages later}}%
+        {(b) The same line slot on nearby pages.}\\[8pt]
+  \panel{\crop{madina-06-p-192-line-1-10-words.png}{p.\,192, line 1: 10 words, natural length 97\%, 89\,px$^2$ ink per letter}%
+         \crop{madina-07-p-192-line-14-5-words.png}{p.\,192, line 14: 5 words, natural length 67\%, 147\,px$^2$ ink per letter (+65\%)}}%
+        {(c) One page, two textures: a sparse line is stretched, enlarged and darkened.}\hfill
+  \panel{\crop{madina-08-p-567-lines-2-3-ayah-marker-split.png}{p.\,567, lines 2--3: the last word of ayah 11 (left box) and its marker (right box)}}%
+        {(d) An ayah's marker carried to the next line.}
+  \caption{Anomalies in the Madina 1441\,H print: crops of the King Fahd Complex PDF~\cite{scan} at native resolution (about 100\,ppi). Measurements are those of Section~\ref{sec:problem}.}
   \label{fig:crops}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[t]
   \centering
@@ -131,7 +139,7 @@ The likely mechanism is scaling of written words to fit: a line scaled up gains 
 \end{figure}
 
 \subsection{Ayah markers cut off from their ayah}
-In 573 lines (6.5\%) on 362 of the 604 pages, a line opens with the marker that closes the previous ayah, so the ayah ends at the far left of one line and its marker appears at the far right of the next (Fig.~\ref{fig:crops}(b)). All 440 such lines on the text-only pages were confirmed on the scan. This is an accepted convention of the print; we list it because a typesetter with more freedom can avoid it.
+In 573 lines (6.5\%) on 362 of the 604 pages, a line opens with the marker that closes the previous ayah, so the ayah ends at the far left of one line and its marker appears at the far right of the next (Fig.~\ref{fig:crops}(d)). All 440 such lines on the text-only pages were confirmed on the scan. This is an accepted convention of the print; we list it because a typesetter with more freedom can avoid it.
 
 \section{Analysis and approach}\label{sec:analysis}
 

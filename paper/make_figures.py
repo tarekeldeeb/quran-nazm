@@ -141,7 +141,8 @@ for n in (1, 2, 156, 590, 591):
     one.save(os.path.join(OUT, f"nazm-p{n:03d}.pdf"))
     print("figure:", f"nazm-p{n:03d}.pdf")
 for name in ("01-1441h-page-156.png", "02-p-102-line-4.png", "03-p-102-line-5.png",
-             "04-p-561-line-9.png", "05-p-563-line-9.png", "08-p-567-lines-2-3-ayah-marker-split.png"):
+             "04-p-561-line-9.png", "05-p-563-line-9.png", "06-p-192-line-1-10-words.png",
+             "07-p-192-line-14-5-words.png", "08-p-567-lines-2-3-ayah-marker-split.png"):
     with open(os.path.join(ROOT, "figures", name), "rb") as f, open(os.path.join(OUT, "madina-" + name), "wb") as g:
         g.write(f.read())
     print("figure:", "madina-" + name)
