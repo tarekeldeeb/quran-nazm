@@ -1,0 +1,192 @@
+"""Build the figures of the Quran-Nazm paper from the repository data.
+
+    python paper/make_figures.py
+
+Inputs: data/*.json (measurements), figures/*.png (Madina print crops),
+output/quran-nazm.pdf (the Nazm render). Outputs go to paper/figures/.
+"""
+import json
+import os
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
+import numpy as np
+import pymupdf
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+OUT = os.path.join(HERE, "figures")
+os.makedirs(OUT, exist_ok=True)
+
+GREEN, CORAL, GREY, INK = "#2F6B55", "#C2412D", "#9AA59F", "#1B2420"
+for path in ("/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf",
+             "/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-bold.otf"):
+    if os.path.exists(path):
+        font_manager.fontManager.addfont(path)
+plt.rcParams.update({
+    "font.family": "TeX Gyre Pagella", "font.size": 8.5, "axes.titlesize": 9,
+    "axes.labelsize": 8.5, "xtick.labelsize": 7.5, "ytick.labelsize": 7.5,
+    "axes.spines.top": False, "axes.spines.right": False, "axes.edgecolor": "#555",
+    "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
+    "legend.frameon": False, "legend.fontsize": 7.5, "pdf.fonttype": 42,
+})
+W1 = 3.35  # one column, inches
+
+
+def data(name):
+    return json.load(open(os.path.join(ROOT, "data", name)))
+
+
+def save(fig, name):
+    fig.savefig(os.path.join(OUT, name), bbox_inches="tight", pad_inches=0.02)
+    plt.close(fig)
+    print("figure:", name)
+
+
+# 1. Natural length of every full line of the Madina 1441H print
+m = [o for o in data("m_1441H.json") if o["full"]]
+ratio = np.array([o["ratio"] for o in m])
+fig, ax = plt.subplots(figsize=(W1, 1.75))
+bins = np.arange(0.6, 1.42, 0.02)
+n, b, patches = ax.hist(ratio, bins=bins, color=GREY, edgecolor="white", linewidth=0.4)
+for p, left in zip(patches, b[:-1]):
+    c = left + 0.01
+    if c > 1.10:
+        p.set_facecolor(CORAL)
+    elif c < 0.90:
+        p.set_facecolor(GREEN)
+ax.axvline(1.0, color=INK, lw=0.7, ls=(0, (3, 2)))
+ax.set_xlabel("natural length of the line ÷ fixed line width")
+ax.set_ylabel("lines")
+ax.set_xticks([0.6, 0.8, 1.0, 1.2, 1.4], ["60%", "80%", "100%", "120%", "140%"])
+ax.text(0.62, n.max() * 0.85, f"{(ratio < 0.9).mean()*100:.0f}% too short\n(stretched)", color=GREEN, fontsize=7)
+ax.text(1.18, n.max() * 0.85, f"{(ratio > 1.1).mean()*100:.0f}% too long\n(compressed)", color=CORAL, fontsize=7)
+save(fig, "fig_density.pdf")
+
+# 2. Pen width and ink per letter by crowding (scan of the 1441H print)
+w = [o for o in data("w_1441H.json") if o.get("full")]
+r = np.array([o["ratio"] for o in w])
+sw = np.array([o["sw"] for o in w])
+ipl = np.array([o["ink"] / o["letters"] for o in w])
+edges = [(0.6, 0.8), (0.8, 0.9), (0.9, 1.0), (1.0, 1.1), (1.1, 1.2), (1.2, 1.4)]
+labels = ["<80", "80–90", "90–100", "100–110", "110–120", ">120"]
+msw = [sw[(r >= a) & (r < c)].mean() for a, c in edges]
+mipl = [ipl[(r >= a) & (r < c)].mean() for a, c in edges]
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(W1, 1.6))
+cols = [GREEN] + [GREY] * 4 + [CORAL]
+a1.bar(range(6), msw, color=cols, width=0.7)
+a1.set_ylim(2.1, 2.36)
+a1.set_title("pen width (px)", loc="left")
+a2.bar(range(6), mipl, color=cols, width=0.7)
+a2.set_ylim(90, 135)
+a2.set_title("ink per letter (px²)", loc="left")
+for ax in (a1, a2):
+    ax.set_xticks(range(6), labels, rotation=45, ha="right")
+    ax.set_xlabel("natural length (%)")
+fig.tight_layout(w_pad=1.2)
+save(fig, "fig_weight.pdf")
+
+# 3. Natural length of the 60 hizbs
+pg = np.array(data("hist60.json")["pg"])
+fig, ax = plt.subplots(figsize=(W1, 1.55))
+bins = np.arange(8.0, 12.01, 0.25)
+ax.hist([pg[:58], pg[58:]], bins=bins, stacked=True, color=[GREEN, GREY], edgecolor="white", linewidth=0.4,
+        label=["hizbs 1–58", "juz 30 (hizbs 59–60)"])
+ax.axvline(10, color=INK, lw=0.7, ls=(0, (3, 2)))
+ax.text(9.95, 12.2, "10 pages", fontsize=7, ha="right")
+ax.set_ylim(0, 13)
+ax.set_yticks([0, 3, 6, 9])
+ax.set_xlabel("natural length of the hizb, in Madina-size pages")
+ax.set_ylabel("hizbs")
+ax.legend(loc="upper right", ncol=1, bbox_to_anchor=(1.0, 1.02))
+save(fig, "fig_hizb.pdf")
+
+# 4. Line stretch: Madina 1441H vs Nazm (all lines, and spread inside each page)
+mad_pages = {}
+for o in m:
+    mad_pages.setdefault(o["p"], []).append(1 / o["ratio"])
+nz = data("nazm_line_stretch.json")["pages"]
+nz_lines = np.array([s for p in nz for s in p["stretch"] if s <= 1.8])
+mad_lines = 1 / ratio
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(W1, 1.7))
+bins = np.arange(0.6, 1.8, 0.03)
+a1.hist(mad_lines, bins=bins, color=CORAL, alpha=0.55, label="Madina 1441H", density=True)
+a1.hist(nz_lines, bins=bins, color=GREEN, alpha=0.65, label="Nazm", density=True)
+a1.set_xlabel("stretch applied to a line")
+a1.set_yticks([])
+a1.set_title("all lines", loc="left")
+sd_m = [np.std(np.log(v)) for v in mad_pages.values() if len(v) >= 10]
+sd_n = [np.std(np.log([s for s in p["stretch"] if s <= 1.8])) for p in nz if p["hizb"] <= 58]
+bins = np.arange(0, 0.2, 0.006)
+a2.hist(sd_m, bins=bins, color=CORAL, alpha=0.55, density=True)
+a2.hist(sd_n, bins=bins, color=GREEN, alpha=0.65, density=True)
+a2.axvline(np.median(sd_m), color=CORAL, lw=0.8)
+a2.axvline(np.median(sd_n), color=GREEN, lw=0.8)
+a2.set_xlabel("spread of stretch within a page")
+a2.set_yticks([])
+a2.set_title("inside each page", loc="left")
+fig.tight_layout(w_pad=1.0, rect=(0, 0, 1, 0.88))
+h, l = a1.get_legend_handles_labels()
+fig.legend(h, l, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.0))
+save(fig, "fig_stretch.pdf")
+print(f"medians: Madina {np.median(sd_m):.3f}, Nazm {np.median(sd_n):.3f}")
+
+# 5. Pages of the Nazm render as vector PDF pages, and crops of the Madina print
+src = pymupdf.open(os.path.join(ROOT, "output", "quran-nazm.pdf"))
+for n in (1, 2, 156, 590, 591):
+    one = pymupdf.open()
+    one.insert_pdf(src, from_page=n - 1, to_page=n - 1)
+    one.save(os.path.join(OUT, f"nazm-p{n:03d}.pdf"))
+    print("figure:", f"nazm-p{n:03d}.pdf")
+for name in ("01-1441h-page-156.png", "02-p-102-line-4.png", "03-p-102-line-5.png",
+             "04-p-561-line-9.png", "05-p-563-line-9.png", "08-p-567-lines-2-3-ayah-marker-split.png"):
+    with open(os.path.join(ROOT, "figures", name), "rb") as f, open(os.path.join(OUT, "madina-" + name), "wb") as g:
+        g.write(f.read())
+    print("figure:", "madina-" + name)
+
+# 6. Page 156 of the 1441H print set at natural length (needs quran-madina-html, see paths.py)
+import sys
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
+from paths import QMH, WORK  # noqa: E402
+sys.path.insert(0, os.path.join(QMH, "src", "db", "v2"))
+import uharfbuzz as hb  # noqa: E402
+import justify as J  # noqa: E402
+from render_svg import GlyphPaths  # noqa: E402
+
+font_path = os.path.join(WORK, "madina.otf")
+font = hb.Font(hb.Face(open(font_path, "rb").read()))
+paths = GlyphPaths(font_path)
+LW = 15437.6
+lines = sorted([o for o in m if o["p"] == 156], key=lambda o: o["l"])
+pitch, left, right = 2300, -4400, LW + 3300
+parts = []
+for i, o in enumerate(lines):
+    buf = J.shape(font, o["text"])
+    x, glyphs = 0, []
+    for inf, pos in zip(buf.glyph_infos, buf.glyph_positions):
+        glyphs.append((inf.codepoint, x + pos.x_offset, pos.y_offset))
+        x += pos.x_advance
+    y = i * pitch + 1500
+    x0 = LW - x
+    if x > LW:
+        parts.append(f'<rect x="{x0:.0f}" y="{y-1250}" width="{x-LW:.0f}" height="{pitch-300}" fill="#F3D2CA"/>')
+    else:
+        parts.append(f'<rect x="0" y="{y-1250}" width="{LW-x:.0f}" height="{pitch-300}" fill="#DCEBE3"/>')
+    for gid, gx, gy in glyphs:
+        d = paths.path(gid)
+        if d:
+            parts.append(f'<path transform="translate({x0+gx:.0f} {y-gy:.0f})" d="{d}" fill="#1B2420"/>')
+    pct = (x / LW - 1) * 100
+    col = "#C2412D" if pct > 10 else "#2F6B55" if pct < -10 else "#6B756F"
+    parts.append(f'<text x="{LW+380}" y="{y-150}" font-family="sans-serif" font-size="720" fill="{col}">{"+" if pct >= 0 else "−"}{abs(pct):.0f}%</text>')
+H = len(lines) * pitch + 300
+for xline in (0, LW):
+    parts.append(f'<line x1="{xline}" y1="0" x2="{xline}" y2="{H}" stroke="#2F6B55" stroke-width="45" stroke-dasharray="170 120"/>')
+svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{left} 0 {right-left} {H}" '
+       f'width="{(right-left)/60:.0f}" height="{H/60:.0f}">' + "".join(parts) + "</svg>")
+doc = pymupdf.open(stream=svg.encode(), filetype="svg")
+pdfbytes = doc.convert_to_pdf()
+open(os.path.join(OUT, "fig_p156_natural.pdf"), "wb").write(pdfbytes)
+print("figure: fig_p156_natural.pdf")

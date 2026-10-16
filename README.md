@@ -48,6 +48,7 @@ python scripts/render_mushaf.py
 | `figures/` | crops of the Madina print used as evidence, and sample Nazm pages |
 | `data/` | rub' boundaries and derived measurements |
 | `output/` | the rendered PDF, its statistics report and the full page layout |
+| `paper/` | LaTeX sources and PDF of the article introducing Quran-Nazm |
 
 ## License
 
