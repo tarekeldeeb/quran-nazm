@@ -1,0 +1,287 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{22}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Anane(2021)]%
+        {anane2021}
+\bibfield{author}{\bibinfo{person}{Amine Anane}.}
+  \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Arabic text justification using {LuaLaTeX} and the
+  {DigitalKhatt} {OpenType} variable font}.
+\newblock \bibinfo{journal}{\emph{TUGboat}} \bibinfo{volume}{42},
+  \bibinfo{number}{3} (\bibinfo{year}{2021}).
+\newblock
+
+
+\bibitem[Anane(2026)]%
+        {digitalkhatt}
+\bibfield{author}{\bibinfo{person}{Amine Anane}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{{DigitalKhatt}: an {Arabic} typesetter and font
+  technology for the {Madina Mushaf}}.
+\newblock \bibinfo{howpublished}{\url{https://digitalkhatt.org},
+  \url{https://github.com/DigitalKhatt}}.
+\newblock
+\newblock
+\shownote{Accessed October 2026}.
+
+
+\bibitem[Benatia et~al\mbox{.}(2006)]%
+        {benatia2006}
+\bibfield{author}{\bibinfo{person}{Mohamed Jamal~Eddine Benatia},
+  \bibinfo{person}{Mohamed Elyaakoubi}, {and} \bibinfo{person}{Azzeddine
+  Lazrek}.} \bibinfo{year}{2006}\natexlab{}.
+\newblock \showarticletitle{Arabic text justification}.
+\newblock \bibinfo{journal}{\emph{TUGboat}} \bibinfo{volume}{27},
+  \bibinfo{number}{2} (\bibinfo{year}{2006}).
+\newblock
+
+
+\bibitem[Eldeeb(2026a)]%
+        {qmh}
+\bibfield{author}{\bibinfo{person}{Tarek Eldeeb}.}
+  \bibinfo{year}{2026}\natexlab{a}.
+\newblock \bibinfo{title}{quran-madina-html: an open-source {Madina} {Mushaf}
+  renderer}.
+\newblock
+  \bibinfo{howpublished}{\url{https://github.com/tarekeldeeb/quran-madina-html}}.
+\newblock
+\newblock
+\shownote{Version 2.0 branch: layout data, patched {DigitalKhatt} fonts and
+  {HarfBuzz} justifier}.
+
+
+\bibitem[Eldeeb(2026b)]%
+        {nazm}
+\bibfield{author}{\bibinfo{person}{Tarek Eldeeb}.}
+  \bibinfo{year}{2026}\natexlab{b}.
+\newblock \bibinfo{title}{Quran-Nazm: rule-based typesetting of the {Quran}}.
+\newblock
+  \bibinfo{howpublished}{\url{https://github.com/tarekeldeeb/quran-nazm}}.
+\newblock
+
+
+\bibitem[Fahmy(2006)]%
+        {fahmy2006}
+\bibfield{author}{\bibinfo{person}{Hossam A.~H. Fahmy}.}
+  \bibinfo{year}{2006}\natexlab{}.
+\newblock \showarticletitle{{AlQalam} for typesetting traditional {Arabic}
+  texts}.
+\newblock \bibinfo{journal}{\emph{TUGboat}} \bibinfo{volume}{27},
+  \bibinfo{number}{2} (\bibinfo{year}{2006}).
+\newblock
+
+
+\bibitem[{fontTools contributors}(2026)]%
+        {fonttools}
+\bibfield{author}{\bibinfo{person}{{fontTools contributors}}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{{fontTools}: a library for manipulating fonts}.
+\newblock \bibinfo{howpublished}{\url{https://github.com/fonttools/fonttools}}.
+\newblock
+
+
+\bibitem[Haralambous(2006)]%
+        {haralambous2006}
+\bibfield{author}{\bibinfo{person}{Yannis Haralambous}.}
+  \bibinfo{year}{2006}\natexlab{}.
+\newblock \showarticletitle{Infrastructure for high-quality {Arabic}
+  typesetting}.
+\newblock \bibinfo{journal}{\emph{TUGboat}} \bibinfo{volume}{27},
+  \bibinfo{number}{2} (\bibinfo{year}{2006}).
+\newblock
+
+
+\bibitem[{HarfBuzz contributors}(2026)]%
+        {harfbuzz}
+\bibfield{author}{\bibinfo{person}{{HarfBuzz contributors}}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{{HarfBuzz}: text shaping engine}.
+\newblock \bibinfo{howpublished}{\url{https://harfbuzz.github.io}}.
+\newblock
+\newblock
+\shownote{Used through the uharfbuzz Python bindings}.
+
+
+\bibitem[Hosny(2026)]%
+        {amiri}
+\bibfield{author}{\bibinfo{person}{Khaled Hosny}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{Amiri: a classical {Arabic} typeface in {Naskh}
+  style}.
+\newblock \bibinfo{howpublished}{\url{https://www.amirifont.org}}.
+\newblock
+
+
+\bibitem[Hurst et~al\mbox{.}(2009)]%
+        {hurst2009}
+\bibfield{author}{\bibinfo{person}{Nathan Hurst}, \bibinfo{person}{Wilmot Li},
+  {and} \bibinfo{person}{Kim Marriott}.} \bibinfo{year}{2009}\natexlab{}.
+\newblock \showarticletitle{Review of Automatic Document Formatting}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 9th ACM Symposium on Document
+  Engineering (DocEng '09)}}.
+\newblock
+
+
+\bibitem[{King Fahd Glorious Qur'an Printing Complex}(2020)]%
+        {kfgqpc}
+\bibfield{author}{\bibinfo{person}{{King Fahd Glorious Qur'an Printing
+  Complex}}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \bibinfo{title}{The {Madina} {Mushaf}, {Hafs} narration, 1441\,H
+  edition}.
+\newblock \bibinfo{howpublished}{\url{https://qurancomplex.gov.sa}}.
+\newblock
+\newblock
+\shownote{Calligraphy by Uthman Taha}.
+
+
+\bibitem[{King Fahd Glorious Qur'an Printing Complex}(2022)]%
+        {kfgqpcdm}
+\bibfield{author}{\bibinfo{person}{{King Fahd Glorious Qur'an Printing
+  Complex}}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \bibinfo{title}{Digital {Mushaf} (Hafs, 1441\,H): {Adobe Illustrator}
+  page files}.
+\newblock \bibinfo{howpublished}{\url{https://dm.qurancomplex.gov.sa}}.
+\newblock
+\newblock
+\shownote{604 vector page masters}.
+
+
+\bibitem[{King Fahd Glorious Qur'an Printing Complex}(2023)]%
+        {scan}
+\bibfield{author}{\bibinfo{person}{{King Fahd Glorious Qur'an Printing
+  Complex}}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \bibinfo{title}{Quran {Mushaf} {Al-Madinah} ({PDF}, 604 pages)}.
+\newblock \bibinfo{howpublished}{Internet Archive,
+  \url{https://archive.org/details/quran-madinah}}.
+\newblock
+\newblock
+\shownote{Page images of 720\,$\times$\,1123 pixels}.
+
+
+\bibitem[Knuth(1984)]%
+        {knuth1984}
+\bibfield{author}{\bibinfo{person}{Donald~E. Knuth}.}
+  \bibinfo{year}{1984}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{The {\TeX}book}}.
+\newblock \bibinfo{publisher}{Addison-Wesley}.
+\newblock
+
+
+\bibitem[Knuth and Plass(1981)]%
+        {knuth1981}
+\bibfield{author}{\bibinfo{person}{Donald~E. Knuth} {and}
+  \bibinfo{person}{Michael~F. Plass}.} \bibinfo{year}{1981}\natexlab{}.
+\newblock \showarticletitle{Breaking Paragraphs into Lines}.
+\newblock \bibinfo{journal}{\emph{Software: Practice and Experience}}
+  \bibinfo{volume}{11}, \bibinfo{number}{11} (\bibinfo{year}{1981}),
+  \bibinfo{pages}{1119--1184}.
+\newblock
+
+
+\bibitem[Mittelbach(2016)]%
+        {mittelbach2016}
+\bibfield{author}{\bibinfo{person}{Frank Mittelbach}.}
+  \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{A General Framework for Globally Optimized
+  Pagination}. In \bibinfo{booktitle}{\emph{Proceedings of the 2016 ACM
+  Symposium on Document Engineering (DocEng '16)}}. \bibinfo{pages}{11--20}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/2960811.2960820}
+\showDOI{\tempurl}
+
+
+\bibitem[Plass(1981)]%
+        {plass1981}
+\bibfield{author}{\bibinfo{person}{Michael~F. Plass}.}
+  \bibinfo{year}{1981}\natexlab{}.
+\newblock \emph{\bibinfo{title}{Optimal Pagination Techniques for Automatic
+  Typesetting Systems}}.
+\newblock \bibinfo{thesistype}{Ph.\,D. Dissertation}. \bibinfo{school}{Stanford
+  University}.
+\newblock
+
+
+\bibitem[{quran-meta contributors}(2026)]%
+        {quranmeta}
+\bibfield{author}{\bibinfo{person}{{quran-meta contributors}}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{quran-meta: {Quran} metadata (hizb quarters, juz,
+  pages)}.
+\newblock
+  \bibinfo{howpublished}{\url{https://www.npmjs.com/package/quran-meta}}.
+\newblock
+\newblock
+\shownote{MIT license}.
+
+
+\bibitem[{quran.ws}(2026)]%
+        {quranassets}
+\bibfield{author}{\bibinfo{person}{{quran.ws}}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{quran-assets: vector page frames and surah headers
+  traced from printed Mushafs}.
+\newblock
+  \bibinfo{howpublished}{\url{https://github.com/quran-ws/quran-assets}}.
+\newblock
+
+
+\bibitem[{Tanzil Project}(2026)]%
+        {tanzil}
+\bibfield{author}{\bibinfo{person}{{Tanzil Project}}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \bibinfo{title}{Tanzil: {Quran} text and metadata}.
+\newblock \bibinfo{howpublished}{\url{https://tanzil.net}}.
+\newblock
+
+
+\bibitem[Woli{\'n}ski(2019)]%
+        {wolinski2019}
+\bibfield{author}{\bibinfo{person}{Marcin Woli{\'n}ski}.}
+  \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Globally Optimal Page Breaking with Column
+  Balancing: A Case Study}. In \bibinfo{booktitle}{\emph{Proceedings of the ACM
+  Symposium on Document Engineering 2019 (DocEng '19)}}. \bibinfo{pages}{1--4}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3342558.3345405}
+\showDOI{\tempurl}
+
+
+\end{thebibliography}

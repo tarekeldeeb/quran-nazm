@@ -27,13 +27,13 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the pap
 
 ## Output
 
-[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages (the same count as the print), 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print. [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
+[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages (the same count as the print), 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print. Page frames and surah headers use the Hafs al-'Adi vector art from [quran-assets](https://quran.ws/blocks/quran-assets). [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
 
 To generate it yourself, see [`docs/RENDERING.md`](docs/RENDERING.md). In short:
 
 ```bash
 git clone -b v2.0 https://github.com/tarekeldeeb/quran-madina-html.git ../quran-madina-html
-pip install uharfbuzz fonttools brotli numpy freetype-py
+pip install uharfbuzz fonttools brotli numpy freetype-py pymupdf
 python scripts/00_prepare.py
 python scripts/render_mushaf.py
 ```
@@ -69,11 +69,12 @@ python scripts/render_mushaf.py
 
 ## License
 
-Dual-licensed: free for non-commercial use under the [Waqf Public License 2.0](https://github.com/ojuba-org/waqf/tree/master/2.0); any commercial use needs prior written permission. See [`LICENSE`](LICENSE). The licence covers this project's own code, documents and renders; third-party material keeps its own terms (see Credits).
+Dual-licensed: free for non-commercial use under the [Waqf Public License 2.0](https://github.com/ojuba-org/waqf/tree/master/2.0); any commercial use needs prior written permission. See [`LICENSE`](LICENSE). The licence covers this project's own code, documents and renders; third-party material keeps its own terms (see Credits). In particular, the page frame and surah header art in `assets/art/` and in the rendered PDF is CC BY-NC-SA 4.0 (provisional, from quran-assets): non-commercial use only, with attribution. `python scripts/render_mushaf.py --art none` renders the Mushaf with Quran-Nazm's own frame and headers instead.
 
 ## Credits
 
 - Text, layout data, fonts and justifier: [quran-madina-html](https://github.com/tarekeldeeb/quran-madina-html), which builds on [DigitalKhatt](https://github.com/DigitalKhatt) by Amine Anane and on the [Tanzil](https://tanzil.net) text.
 - Rub' boundaries: [quran-meta](https://www.npmjs.com/package/quran-meta) (MIT).
 - Running heads and page numbers: [Amiri Quran](https://www.amirifont.org) by Khaled Hosny.
+- Page frame and surah header art: [quran-assets](https://github.com/quran-ws/quran-assets) by quran.ws, Hafs al-'Adi style, traced from the King Fahd Complex's standard Hafs Mushaf. See [`assets/art/hafs-adi/README.md`](assets/art/hafs-adi/README.md).
 - Madina Mushaf images in `figures/` are crops of the King Fahd Complex for the Printing of the Holy Quran edition, reproduced for analysis.

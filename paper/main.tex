@@ -343,7 +343,7 @@ Quran-Nazm~\cite{nazm} is a single Python program, \texttt{render\_mushaf.py}, b
 
 \paragraph{Ink check.} Every set line is tested for ink contact between neighbouring words: glyph boxes that intersect are rasterised at 5 font units per pixel and compared pixel by pixel. Ten contacts in the book, nearly all a small pause mark meeting the tall stroke of a following kaf, are cleared by widening only that space and refitting the line.
 
-\paragraph{Output.} A minimal PDF writer stores each glyph outline once as a form object shared by all pages and places it by matrix, which keeps the 604-page book at 10\,MB with vector text. Surah headers are vector art (a ribbon, a cartouche with a double outline, eight-pointed stars); running heads use Amiri Quran~\cite{amiri}. The whole Mushaf renders in about a minute on a laptop-class CPU, and a re-run against the current quran-madina-html reproduces the published statistics exactly.
+\paragraph{Output.} A minimal PDF writer stores each glyph outline once as a form object shared by all pages and places it by matrix, which keeps the 604-page book at 10\,MB with vector text. The page frame and surah header are the Hafs al-`Adi vector ornaments of quran-assets~\cite{quranassets}, traced from the Complex's standard Hafs print: each SVG has a transparent slot, the frame's slot is stretched over the text block and the header's holds the surah name, and both are laid under the text as shared form objects. Running heads use Amiri Quran~\cite{amiri}. The whole Mushaf renders in about a minute on a laptop-class CPU, and a re-run against the current quran-madina-html reproduces the published statistics exactly.
 
 \section{Evaluation}\label{sec:results}
 
@@ -467,7 +467,7 @@ Everything in this paper is generated from public inputs by the scripts in the Q
 Unequal reading units are the root of layout variance in every Mushaf. The Madina print fixes the juz, the most forgiving unit, and still absorbs its share by hand: a third of its lines are off their natural length by over 10\%, and stroke weight follows the crowding. Quran-Nazm fixes the stricter unit of ten pages per hizb and absorbs the larger variance by explicit rules: every page ends on an ayah, no word collides with its neighbour, and the variation of lines within a page falls by 38\%. The program, data, measurements and the rendered Mushaf are available under a dual Waqf\,2.0/commercial licence~\cite{nazm}.
 
 \begin{acks}
-This work builds on DigitalKhatt by Amine Anane, the Tanzil project, HarfBuzz, fontTools~\cite{fonttools}, quran-meta and Amiri. The Madina Mushaf images are reproduced from the King Fahd Complex edition for analysis.
+This work builds on DigitalKhatt by Amine Anane, the Tanzil project, HarfBuzz, fontTools~\cite{fonttools}, quran-meta and Amiri. The page frame and surah header art comes from quran-assets by quran.ws (CC BY-NC-SA~4.0). The Madina Mushaf images are reproduced from the King Fahd Complex edition for analysis.
 \end{acks}
 
 \bibliographystyle{ACM-Reference-Format}

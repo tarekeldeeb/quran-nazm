@@ -105,7 +105,7 @@ The renderer starts every surah on a new line, which balances lines within surah
 
 **Collisions.** The first full render had words running into each other on compressed lines (page 18 was reported). The cause was the font's word-shrink features (`shr1`, `shrr`), which the quran-madina-html justifier applies word by word: shaped inside a whole line they shift a word into its neighbour (page 18: اذكروا into إسرائيل, إماما into للناس) or squash letters within it (واتخذوا, ءامنا). The renderer no longer uses them; a line that must compress tightens its spaces to at most 60% and is then scaled horizontally, which raised the share of horizontally squeezed lines from 14% to 21%. Every line is now checked for real ink contact between neighbouring words: candidate pairs come from intersecting glyph boxes and are confirmed by rasterising their outlines. Ten remaining contacts, almost all a small pause mark (ۚ ۗ ۖ) touching the tall stroke of a following كذلك or كمثل, are cleared by widening only that space; the report shows 0 collisions left.
 
-**Surah headers** are drawn as vector art: a pale ribbon between two fine rules, a central cartouche with pointed ends and a double outline holding the surah name, a small diamond on each side, and an eight-pointed star at each end.
+**Page frame and surah headers** use the Hafs al-'Adi vector art from [quran-assets](https://github.com/quran-ws/quran-assets) (CC BY-NC-SA 4.0, provisional): the frame's transparent slot is stretched over the text block and the header cartouche holds the surah name. `--art none` keeps Quran-Nazm's own vector frame and headers.
 
 ## 8. Open points
 

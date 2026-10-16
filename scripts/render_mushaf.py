@@ -33,7 +33,7 @@ import zlib
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from paths import DATA, QMH, WORK
+from paths import DATA, QMH, ROOT, WORK
 
 sys.path.insert(0, os.path.join(QMH, "src", "db", "v2"))
 import justify as J  # noqa: E402  (HarfBuzz justifier from quran-madina-html v2)
@@ -48,16 +48,25 @@ FONT_PATH = os.path.join(WORK, "madina.otf")
 LABEL_FONT_PATH = os.path.join(WORK, "amiri.ttf")  # Amiri Quran: digits for page numbers and running heads
 DB_PATH = os.path.join(QMH, "assets", "db", "v2", "Madina-1441H.json")
 
-# Physical page (points). Text block 110 mm wide, 15 rows; row pitch keeps the
+# Physical page (points). Text block 100 mm wide, 15 rows; row pitch keeps the
 # Madina proportion of 0.1086 x line width measured on the 1441H print.
 MM = 72 / 25.4
 PAGE_W, PAGE_H = 145 * MM, 210 * MM
-BLOCK_W = 110 * MM
+BLOCK_W = 100 * MM
 PITCH_RATIO = 0.1086
 BASELINE_IN_ROW = 0.68
 INK = (0.09, 0.09, 0.09)
 GREEN = (0.18, 0.42, 0.33)
 PALE = (0.93, 0.96, 0.94)
+
+# Page frame and surah header art (vector, from quran-ws/quran-assets; see assets/art/*/README.md).
+# Each SVG has a transparent "slot" (x, y, w, h in its viewBox) where the text or the
+# surah name goes; the art is scaled so that slot fits the text block or the title.
+ART_STYLES = {
+    "hafs-adi": dict(frame="page-frame.svg", frame_box=(64.419, 100.0), frame_slot=(4.2763, 5.0439, 55.8662, 89.9671),
+                     header="surah-header.svg", header_box=(872.674, 100.0), header_slot=(239.8256, 9.593, 393.314, 81.1047)),
+}
+SLOT_PAD = 1.5 * MM  # white space between the text block and the frame's inner edge
 
 AR_DIGITS = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
 
@@ -374,6 +383,7 @@ class Pdf:
             tt = TTFont(path)
             self.sets[prefix] = (tt.getGlyphSet(), tt.getGlyphOrder())
         self.outlines = []  # (title, page_index)
+        self.art = []  # (page_index, 'frame' | 'header', (x0, y0, x1, y1) in PDF points)
 
     def add(self, body):
         self.objs.append(body)
@@ -704,33 +714,56 @@ def render_page(pdf, txt, page, number, W, stats):
     x0 = (PAGE_W - BLOCK_W) / 2
     top = PAGE_H - (PAGE_H - LINES * pitch) / 2 + 4
     out, used = [], set()
-    # frame
-    pad = 9
-    out.append(f"q {rgb(GREEN, True)} 1.2 w " + rounded_rect(x0 - pad, top - LINES * pitch - pad, BLOCK_W + 2 * pad,
-                                                              LINES * pitch + 2 * pad, 6) + " S Q")
-    out.append(f"q {rgb(GREEN, True)} 0.4 w " + rounded_rect(x0 - pad + 3, top - LINES * pitch - pad + 3,
-                                                              BLOCK_W + 2 * pad - 6, LINES * pitch + 2 * pad - 6, 4) + " S Q")
+    art = ART_STYLES.get(stats.get("art"))
+    bottom = top - LINES * pitch
+    if art:
+        # quran-assets frame: its slot is stretched over the text block plus a small pad
+        fw, fh = art["frame_box"]
+        sx0, sy0, sw, sh = art["frame_slot"]
+        kx = (BLOCK_W + 2 * SLOT_PAD) / sw
+        ky = (LINES * pitch + 2 * SLOT_PAD) / sh
+        fx0 = x0 - SLOT_PAD - sx0 * kx
+        ftop = top + SLOT_PAD + sy0 * ky
+        frame = (fx0, ftop - fh * ky, fx0 + fw * kx, ftop)
+        pdf.art.append((len(pdf.pages), "frame", frame))
+        head_y, foot_y = frame[3] + 2.6 * MM, frame[1] - 6.0 * MM
+    else:
+        pad = 9
+        out.append(f"q {rgb(GREEN, True)} 1.2 w " + rounded_rect(x0 - pad, bottom - pad, BLOCK_W + 2 * pad,
+                                                                  LINES * pitch + 2 * pad, 6) + " S Q")
+        out.append(f"q {rgb(GREEN, True)} 0.4 w " + rounded_rect(x0 - pad + 3, bottom - pad + 3,
+                                                                  BLOCK_W + 2 * pad - 6, LINES * pitch + 2 * pad - 6, 4) + " S Q")
+        head_y, foot_y = top + pad + 10, bottom - pad - 22
     # running heads: surah (right), juz and hizb (left), page number (bottom)
     s0 = page["ayahs"][0][0]
     small = k * 0.62
     g, w = plain(txt, txt.suras[s0 - 1]["title"])
     out.append(f"q {rgb(GREEN)}")
-    place(g, x0 + BLOCK_W - w * small, top + pad + 10, small, 1.0, used, out)
+    place(g, x0 + BLOCK_W - w * small, head_y, small, 1.0, used, out)
     label = f"الجزء {ar_num((page['hizb'] + 1) // 2)}   الحزب {ar_num(page['hizb'])}"
     lab = k * 0.55
     g, w = plain(txt, label, txt.label_font)
-    place(g, x0, top + pad + 10, lab, 1.0, used, out, "A")
+    place(g, x0, head_y, lab, 1.0, used, out, "A")
     g, w = plain(txt, ar_num(number), txt.label_font)
-    place(g, PAGE_W / 2 - w * lab / 2, top - LINES * pitch - pad - 22, lab, 1.0, used, out, "A")
+    place(g, PAGE_W / 2 - w * lab / 2, foot_y, lab, 1.0, used, out, "A")
     out.append("Q")
     out.append(f"q {rgb(INK)}")
     for i, row in enumerate(page["rows"]):
         ytop = top - i * pitch
         base = ytop - BASELINE_IN_ROW * pitch
         if row[0] == "title":
-            out.append("Q " + surah_header_art(x0, BLOCK_W, ytop - pitch / 2, pitch) + f" q {rgb(INK)}")
             g, w = plain(txt, txt.suras[row[1] - 1]["title"])
             s = 0.8 * k
+            if art:
+                bw, bh = art["header_box"]
+                hh = 0.96 * pitch
+                hw = min(BLOCK_W, hh * bw / bh)
+                hx = x0 + (BLOCK_W - hw) / 2
+                cy = ytop - pitch / 2
+                pdf.art.append((len(pdf.pages), "header", (hx, cy - hh / 2, hx + hw, cy + hh / 2)))
+                s = min(s, 0.86 * art["header_slot"][2] / bw * hw / w)  # keep the name inside the slot
+            else:
+                out.append("Q " + surah_header_art(x0, BLOCK_W, ytop - pitch / 2, pitch) + f" q {rgb(INK)}")
             place(g, x0 + BLOCK_W / 2 - w * s / 2, ytop - pitch / 2 - 0.22 * pitch, s, 1.0, used, out)
             pdf.outlines.append((txt.suras[row[1] - 1]["title"], len(pdf.pages)))
             continue
@@ -763,10 +796,33 @@ def render_page(pdf, txt, page, number, W, stats):
     pdf.add_page("\n".join(out), used)
 
 
+def apply_art(path, records, style):
+    """Lay the quran-assets SVG frame and surah headers under the text of the
+    finished PDF. Each SVG is converted to PDF once and placed as a form object."""
+    import pymupdf
+    art = ART_STYLES[style]
+    base = os.path.join(ROOT, "assets", "art", style)
+    src = {}
+    for kind in ("frame", "header"):
+        svg = pymupdf.open(os.path.join(base, art[kind]))
+        src[kind] = pymupdf.open("pdf", svg.convert_to_pdf())
+    doc = pymupdf.open(path)
+    for page_index, kind, (x0, y0, x1, y1) in records:
+        page = doc[page_index]
+        rect = pymupdf.Rect(x0, PAGE_H - y1, x1, PAGE_H - y0)
+        page.show_pdf_page(rect, src[kind], 0, keep_proportion=False, overlay=False)
+    tmp = path + ".tmp"
+    doc.save(tmp, garbage=3, deflate=True)
+    doc.close()
+    os.replace(tmp, path)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--shrink", type=float, default=0.25, help="largest allowed compression of a line (default 0.25)")
     ap.add_argument("--out", default=os.path.join(WORK, "quran-nazm.pdf"))
+    ap.add_argument("--art", default="hafs-adi", choices=sorted(ART_STYLES) + ["none"],
+                    help="page frame and surah header art from assets/art (default hafs-adi; 'none' draws the built-in vector art)")
     ap.add_argument("--pages", default=None, help="page range to render, e.g. 1-20 (layout is always computed for the whole book)")
     args = ap.parse_args()
     t0 = time.time()
@@ -778,12 +834,15 @@ def main():
     if args.pages:
         lo, hi = (int(x) for x in args.pages.split("-"))
     pdf = Pdf()
-    stats = dict(ratios=[], xscale=[], centred=0, collisions=[], cleared=0, ink=InkCheck(FONT_PATH))
+    stats = dict(ratios=[], xscale=[], centred=0, collisions=[], cleared=0, ink=InkCheck(FONT_PATH),
+                 art=None if args.art == "none" else args.art)
     for n in range(lo, hi + 1):
         render_page(pdf, txt, book[n - 1], n, W, stats)
         if n % 50 == 0:
             print(f"  page {n} ({time.time() - t0:.0f}s)")
     pdf.save(args.out, "Quran-Nazm")
+    if args.art != "none":
+        apply_art(args.out, pdf.art, args.art)
     r, xs = np.array(stats["ratios"]), np.array(stats["xscale"])
     # checks: every page ends on an ayah marker, no line starts with one
     ends_ok = all(p["rows"][-1][0] == "text" and MARK in p["rows"][-1][1][-1] for p in book)
