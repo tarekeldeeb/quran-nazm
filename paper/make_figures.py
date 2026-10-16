@@ -21,12 +21,12 @@ OUT = os.path.join(HERE, "figures")
 os.makedirs(OUT, exist_ok=True)
 
 GREEN, CORAL, GREY, INK = "#2F6B55", "#C2412D", "#9AA59F", "#1B2420"
-for path in ("/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-regular.otf",
-             "/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-bold.otf"):
+for path in ("/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyretermes-regular.otf",
+             "/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyretermes-bold.otf"):
     if os.path.exists(path):
         font_manager.fontManager.addfont(path)
 plt.rcParams.update({
-    "font.family": "TeX Gyre Pagella", "font.size": 8.5, "axes.titlesize": 9,
+    "font.family": "TeX Gyre Termes", "font.size": 8.5, "axes.titlesize": 9,
     "axes.labelsize": 8.5, "xtick.labelsize": 7.5, "ytick.labelsize": 7.5,
     "axes.spines.top": False, "axes.spines.right": False, "axes.edgecolor": "#555",
     "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
@@ -161,7 +161,7 @@ paths = GlyphPaths(font_path)
 LW = 15437.6
 lines = sorted([o for o in m if o["p"] == 156], key=lambda o: o["l"])
 pitch, left, right = 2300, -4400, LW + 3300
-parts = []
+parts, labels = [], []
 for i, o in enumerate(lines):
     buf = J.shape(font, o["text"])
     x, glyphs = 0, []
@@ -180,13 +180,22 @@ for i, o in enumerate(lines):
             parts.append(f'<path transform="translate({x0+gx:.0f} {y-gy:.0f})" d="{d}" fill="#1B2420"/>')
     pct = (x / LW - 1) * 100
     col = "#C2412D" if pct > 10 else "#2F6B55" if pct < -10 else "#6B756F"
-    parts.append(f'<text x="{LW+380}" y="{y-150}" font-family="sans-serif" font-size="720" fill="{col}">{"+" if pct >= 0 else "−"}{abs(pct):.0f}%</text>')
+    labels.append((LW + 380, y - 150, f'{"+" if pct >= 0 else "−"}{abs(pct):.0f}%', col))
 H = len(lines) * pitch + 300
 for xline in (0, LW):
     parts.append(f'<line x1="{xline}" y1="0" x2="{xline}" y2="{H}" stroke="#2F6B55" stroke-width="45" stroke-dasharray="170 120"/>')
 svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{left} 0 {right-left} {H}" '
        f'width="{(right-left)/60:.0f}" height="{H/60:.0f}">' + "".join(parts) + "</svg>")
 doc = pymupdf.open(stream=svg.encode(), filetype="svg")
-pdfbytes = doc.convert_to_pdf()
-open(os.path.join(OUT, "fig_p156_natural.pdf"), "wb").write(pdfbytes)
+fig = pymupdf.open("pdf", doc.convert_to_pdf())
+# percentage labels are drawn afterwards with an embedded TeX Gyre Termes, so
+# the figure carries no unembedded fonts (required for IEEE submission)
+page = fig[0]
+termes = "/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyretermes-regular.otf"
+page.insert_font(fontname="termes", fontfile=termes)
+sx = page.rect.width / (right - left)
+for x_u, y_u, label, col in labels:
+    page.insert_text(((x_u - left) * sx, y_u * sx), label, fontname="termes", fontsize=720 * sx,
+                     color=tuple(int(col[i:i + 2], 16) / 255 for i in (1, 3, 5)))
+fig.save(os.path.join(OUT, "fig_p156_natural.pdf"), garbage=3, deflate=True)
 print("figure: fig_p156_natural.pdf")

@@ -1,59 +1,45 @@
-% Quran-Nazm: Rule-Based Quran Typesetting that Reduces the Layout Variance of the Madina Mushaf
-% Build: see paper/README.md (xelatex + bibtex)
-\documentclass[10pt,a4paper,twocolumn]{article}
+\documentclass[conference,a4paper]{IEEEtran}
+% IEEEtran.cls / IEEEtran.bst v1.8b are included in this folder (LPPL).
 
-\usepackage[a4paper,top=20mm,bottom=22mm,left=17mm,right=17mm,columnsep=7mm]{geometry}
-\usepackage{fontspec}
-\setmainfont{TeX Gyre Pagella}
-\setsansfont{TeX Gyre Heros}[Scale=0.92]
+\usepackage{mathptmx}
+\usepackage[no-math]{fontspec}
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
 \setmonofont{TeX Gyre Cursor}
 \usepackage{amsmath,amssymb}
-\usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{booktabs,multirow,tabularx}
 \usepackage[table]{xcolor}
-\usepackage[font=small,labelfont={bf,sf},labelsep=period,skip=4pt]{caption}
-\usepackage{subcaption}
-\usepackage{titlesec}
-\usepackage{enumitem}
+\usepackage[caption=false,font=footnotesize]{subfig}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta}
-\usepackage[numbers,sort&compress]{natbib}
-\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{pdftitle={Quran-Nazm: Rule-Based Quran Typesetting that Reduces the Layout Variance of the Madina Mushaf},pdfauthor={Tarek Eldeeb}}
 
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
-\definecolor{rule}{HTML}{C9D3CC}
-\hypersetup{colorlinks=true,linkcolor=nazm,citecolor=nazm,urlcolor=nazm,
-  pdftitle={Quran-Nazm: Rule-Based Quran Typesetting that Reduces the Layout Variance of the Madina Mushaf},pdfauthor={Tarek Eldeeb}}
-
-\titleformat{\section}{\sffamily\bfseries\large\color{nazm}}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\sffamily\bfseries\normalsize}{\thesubsection}{0.5em}{}
-\titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt}
-\titlespacing*{\subsection}{0pt}{7pt plus 2pt}{2pt}
-\setlist{nosep,leftmargin=1.2em}
-\setlength{\parskip}{0pt}
-\renewcommand{\arraystretch}{1.08}
 \newcommand{\x}{\ensuremath{\times}}
 
 \begin{document}
 
-\twocolumn[{%
-\begin{center}
-  {\sffamily\small\color{nazm}\MakeUppercase{Arabic typography $\cdot$ digital typesetting}}\\[6pt]
-  {\LARGE\bfseries Quran-Nazm: Rule-Based Quran Typesetting\\[2pt] that Reduces the Layout Variance of the Madina Mushaf}\\[5pt]
-  {\large Measuring the variance of manual setting, and reducing it with DigitalKhatt}\\[10pt]
-  {\normalsize Tarek Eldeeb}\\[1pt]
-  {\small\texttt{tarek.eldeeb@gmail.com} $\cdot$ \url{https://github.com/tarekeldeeb/quran-nazm}}\\[10pt]
-\end{center}
-\begin{center}
-\begin{minipage}{0.86\textwidth}
-\small\textbf{Abstract.}
+\title{Quran-Nazm: Rule-Based Quran Typesetting that Reduces the Layout Variance of the Madina Mushaf}
+
+\author{\IEEEauthorblockN{Tarek Eldeeb}
+\IEEEauthorblockA{Quran-Nazm project\\
+\url{https://github.com/tarekeldeeb/quran-nazm}\\
+tarek.eldeeb@gmail.com}}
+
+\maketitle
+
+\begin{abstract}
 The Madina Mushaf, written by the calligrapher Uthman Taha and printed by the King Fahd Complex, is the reference for most printed Qurans. Its hand is admired; its page layout, assembled manually, is not uniform. Measuring all 8{,}790 full lines of the current (1441\,H) edition against a uniform DigitalKhatt reproduction of the same hand, we find that a line holds between 4 and 15 words, that its natural length ranges from 62\% to 136\% of the fixed line width, and that one line in three is more than 10\% too long or too short. On the printed page, pen width varies by 13\% between lines and tracks crowding, and 6.5\% of lines open with the marker that closes the previous ayah. We present \emph{Quran-Nazm}, an automatic typesetter that replaces manual layout with explicit rules: every hizb fills exactly ten 15-line pages, every page ends on an ayah, and each hizb is set as one natural line that is cut into equal pages and equal lines by dynamic programming, then justified with DigitalKhatt's letter elongation under a 25\% compression limit. The complete Mushaf renders in about one minute to 604 vector pages at 93\% of the Madina type size. Within a page, the spread of line stretch falls from 0.063 to 0.039, a reduction of 38\%, with every page ending on an ayah and no colliding words.
-\end{minipage}
-\end{center}
-\vspace{10pt}
-}]
+\end{abstract}
+
+\begin{IEEEkeywords}
+Arabic typography, Quran, Madina Mushaf, line breaking, text justification, kashida, DigitalKhatt, dynamic programming
+\end{IEEEkeywords}
 
 \section{Introduction}
 The Madina Mushaf has shaped how the Quran looks to readers for four decades. Its fifteen-line pages, each beginning and ending on an ayah in most editions, have become a shared map: readers memorise by page and quote by position. The text was written by hand by Uthman Taha and the pages were then composed manually~\cite{kfgqpc}. The hand is the model that digital efforts try to reproduce; the composition is something else. Lines were filled by what fitted, stretched or compressed by eye, and in places the written words were scaled to close a line.
@@ -69,14 +55,8 @@ This paper asks a different question: \emph{if a machine sets the Mushaf, which 
 
 \begin{figure*}[t]
   \centering
-  \begin{subfigure}[b]{0.36\textwidth}\centering
-    \includegraphics[width=\linewidth]{figures/madina-01-1441h-page-156.png}
-    \caption{Madina 1441\,H print, page 156.}
-  \end{subfigure}\hspace{10mm}%
-  \begin{subfigure}[b]{0.395\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p156.pdf}
-    \caption{Quran-Nazm, page 156.}
-  \end{subfigure}
+  \subfloat[Madina 1441\,H print, page 156.]{\includegraphics[width=0.36\textwidth]{figures/madina-01-1441h-page-156.png}}\hspace{10mm}%
+  \subfloat[Quran-Nazm, page 156.]{\includegraphics[width=0.395\textwidth,trim=40 40 40 40,clip]{figures/nazm-p156.pdf}}
   \caption{The same passage (Al-A'raf 44 onward) in the print and in Quran-Nazm. In the print, line~11 carries 25\% more text than fits at natural size while the lowest lines are spaced out; in Nazm the lines of a page carry equal shares of text. Nazm pages carry running heads, vector surah headers and a fixed frame.}
   \label{fig:teaser}
 \end{figure*}
@@ -85,9 +65,9 @@ This paper asks a different question: \emph{if a machine sets the Mushaf, which 
 We use the 1441\,H edition throughout, the current one. Two sources are measured: the line breaks of the print, from the DigitalKhatt layout data used by quran-madina-html~\cite{qmh}, and the printed pages themselves, from the King Fahd Complex PDF~\cite{scan}.
 
 \subsection{Line density}
-Each full line of the print was shaped once, with no justification, in the QMH New Madina font (a patched DigitalKhatt font), and its natural length compared with the fixed line width. If the hand were set evenly, all lines would sit near 100\%. Figure~\ref{fig:density} shows they do not: natural length runs from 62\% to 136\%; 15\% of lines are more than 10\% short and had to be stretched, and 18\% are more than 10\% long and had to be compressed. A full line holds 4 to 15 words and 21 to 52 letters.
+Each full line of the print was shaped once, with no justification, in the QMH New Madina font (a patched DigitalKhatt font), and its natural length compared with the fixed line width. If the hand were set evenly, all lines would sit near 100\%. Fig.~\ref{fig:density} shows they do not: natural length runs from 62\% to 136\%; 15\% of lines are more than 10\% short and had to be stretched, and 18\% are more than 10\% long and had to be compressed. A full line holds 4 to 15 words and 21 to 52 letters.
 
-Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hold nine words, yet their natural lengths are $+11\%$, $-22\%$ and $+14\%$: word length matters as much as word count. Page~156 (Figures~\ref{fig:teaser}a and~\ref{fig:p156}) is the most uneven full page: most of its lines are overfull, up to $+25\%$ on line~11, while its last line is 15\% short, so the same hand appears compressed at the top of the page and spaced out at the bottom. Table~\ref{tab:madina} summarises the measurements of this section.
+Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hold nine words, yet their natural lengths are $+11\%$, $-22\%$ and $+14\%$: word length matters as much as word count. Page~156 (Figs.~\ref{fig:teaser}(a) and~\ref{fig:p156}) is the most uneven full page: most of its lines are overfull, up to $+25\%$ on line~11, while its last line is 15\% short, so the same hand appears compressed at the top of the page and spaced out at the bottom. Table~\ref{tab:madina} summarises the measurements of this section.
 
 \begin{figure}[t]
   \centering
@@ -127,8 +107,8 @@ Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hol
 On the scanned pages (720\,\x\,1123\,px, about 100\,ppi) we split each page into its 15 line bands, masked the coloured ayah markers, upsampled each band four times and measured the mean pen width as ink area divided by skeleton length. Over 7{,}320 lines on the 488 pages made only of text:
 \begin{itemize}
   \item a heavy line has a 13\% thicker stroke than a light one (5th to 95th percentile), and the spread inside one page is typically 9\%;
-  \item on page~102, line~5 is 16\% heavier than line~4 directly above it, and page~561 is 19\% heavier than page~563 (Figure~\ref{fig:crops});
-  \item weight follows crowding (Figure~\ref{fig:weight}): sparse lines, which were stretched, are written with 6\% thicker strokes than crowded ones, and ink per letter spans 1.36\x{} and correlates with crowding at $r=-0.61$.
+  \item on page~102, line~5 is 16\% heavier than line~4 directly above it, and page~561 is 19\% heavier than page~563 (Fig.~\ref{fig:crops});
+  \item weight follows crowding (Fig.~\ref{fig:weight}): sparse lines, which were stretched, are written with 6\% thicker strokes than crowded ones, and ink per letter spans 1.36\x{} and correlates with crowding at $r=-0.61$.
 \end{itemize}
 The likely mechanism is scaling of written words to fit: a line scaled up gains stroke weight as well as length. At this resolution a stroke is about two pixels wide, so we read these figures as relative differences; the crops show that they are visible.
 
@@ -151,12 +131,12 @@ The likely mechanism is scaling of written words to fit: a line scaled up gains 
 \end{figure}
 
 \subsection{Ayah markers cut off from their ayah}
-In 573 lines (6.5\%) on 362 of the 604 pages, a line opens with the marker that closes the previous ayah, so the ayah ends at the far left of one line and its marker appears at the far right of the next (Figure~\ref{fig:crops}b). All 440 such lines on the text-only pages were confirmed on the scan. This is an accepted convention of the print; we list it because a typesetter with more freedom can avoid it.
+In 573 lines (6.5\%) on 362 of the 604 pages, a line opens with the marker that closes the previous ayah, so the ayah ends at the far left of one line and its marker appears at the far right of the next (Fig.~\ref{fig:crops}(b)). All 440 such lines on the text-only pages were confirmed on the scan. This is an accepted convention of the print; we list it because a typesetter with more freedom can avoid it.
 
 \section{Analysis and approach}\label{sec:analysis}
 
 \subsection{Choosing the unit of consistency}
-Readers value predictable positions: where a section starts, how many pages it spans. Our first target was every rub' (a quarter hizb) on exactly two pages. Table~\ref{tab:units} shows why that fails: rub' lengths differ by 2.19\x, so the longest rub' forces type down to 56\% of the Madina size while the shortest must stretch 2.26\x{} on average. Variance shrinks as the unit grows; the hizb (half a juz) is the smallest unit at which stretching stays within what DigitalKhatt renders gracefully. Hizb lengths still differ by 1.35\x{} (Figure~\ref{fig:hizb}). Ten pages per hizb keeps Madina's own density of about nine words per line; eight pages gives the same stretch but type at 63\%. Juz 30, with 37 short surahs and their headers, is a declared exception.
+Readers value predictable positions: where a section starts, how many pages it spans. Our first target was every rub' (a quarter hizb) on exactly two pages. Table~\ref{tab:units} shows why that fails: rub' lengths differ by 2.19\x, so the longest rub' forces type down to 56\% of the Madina size while the shortest must stretch 2.26\x{} on average. Variance shrinks as the unit grows; the hizb (half a juz) is the smallest unit at which stretching stays within what DigitalKhatt renders gracefully. Hizb lengths still differ by 1.35\x{} (Fig.~\ref{fig:hizb}). Ten pages per hizb keeps Madina's own density of about nine words per line; eight pages gives the same stretch but type at 63\%. Juz 30, with 37 short surahs and their headers, is a declared exception.
 
 \begin{table}[t]
   \centering\small
@@ -216,22 +196,13 @@ The whole book shares one line width $W=(1-\sigma)\max_\ell w_\ell$, where $w_\e
 \section{Implementation}\label{sec:impl}
 \begin{figure*}[t]
   \centering
-  \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p591.pdf}
-    \caption{Page 591: Al-Tariq and Al-A'la.}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p002.pdf}
-    \caption{Page 2: Al-Baqara.}
-  \end{subfigure}\hfill
-  \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p001.pdf}
-    \caption{Page 1: Al-Fatiha, Al-Baqara.}
-  \end{subfigure}
+  \subfloat[Page 591: Al-Tariq and Al-A'la.]{\includegraphics[width=0.3\textwidth,trim=40 40 40 40,clip]{figures/nazm-p591.pdf}}\hfill
+  \subfloat[Page 2: Al-Baqara.]{\includegraphics[width=0.3\textwidth,trim=40 40 40 40,clip]{figures/nazm-p002.pdf}}\hfill
+  \subfloat[Page 1: Al-Fatiha, Al-Baqara.]{\includegraphics[width=0.3\textwidth,trim=40 40 40 40,clip]{figures/nazm-p001.pdf}}
   \caption{Quran-Nazm pages. Each surah begins on a new line under its header; lines of a page carry equal text; every page ends on an ayah.}
   \label{fig:pages}
 \end{figure*}
-Quran-Nazm~\cite{nazm} is a single Python program, \texttt{render\_mushaf.py}, built on the data and justifier of quran-madina-html~\cite{qmh}. Figure~\ref{fig:pipeline} shows its stages.
+Quran-Nazm~\cite{nazm} is a single Python program, \texttt{render\_mushaf.py}, built on the data and justifier of quran-madina-html~\cite{qmh}. Fig.~\ref{fig:pipeline} shows its stages.
 
 \begin{figure}[t]
 \centering
@@ -264,7 +235,7 @@ Quran-Nazm~\cite{nazm} is a single Python program, \texttt{render\_mushaf.py}, b
 \paragraph{Output.} A minimal PDF writer stores each glyph outline once as a form object shared by all pages and places it by matrix. Surah headers are vector art (a ribbon, a cartouche with a double outline, eight-pointed stars); running heads use Amiri Quran~\cite{amiri}. The whole Mushaf renders in about a minute.
 
 \section{Results and comparison}\label{sec:results}
-Table~\ref{tab:results} compares the render with the print. The key measure of harmony is the spread of stretch \emph{inside a page}: the standard deviation of $\log s_\ell$ over a page's lines, taken as the median over pages. It falls from 0.063 in the print to 0.039 in Nazm (Figure~\ref{fig:stretch}), and the average stretch of neighbouring pages differs slightly less than in the print (median 0.044 vs 0.051 in log stretch). Every page ends on an ayah, no line opens with a marker, and no two words touch.
+Table~\ref{tab:results} compares the render with the print. The key measure of harmony is the spread of stretch \emph{inside a page}: the standard deviation of $\log s_\ell$ over a page's lines, taken as the median over pages. It falls from 0.063 in the print to 0.039 in Nazm (Fig.~\ref{fig:stretch}), and the average stretch of neighbouring pages differs slightly less than in the print (median 0.044 vs 0.051 in log stretch). Every page ends on an ayah, no line opens with a marker, and no two words touch.
 
 \begin{table}[t]
   \centering\small
@@ -294,7 +265,7 @@ Table~\ref{tab:results} compares the render with the print. The key measure of h
   \label{fig:stretch}
 \end{figure}
 
-The price is visible in two places. Nazm stretches more on average (median 1.07\x), because the line width is set by the densest text in the book; and at the 25\% limit, one line in five is compressed partly by horizontal scaling, most visibly on the densest hizb (Al-Mujadila). Both trace to the compression side of the font: DigitalKhatt elongates gracefully but has few safe ways to contract a word inside a line. In juz 30, keeping every page evenly filled splits five short surahs across pages (each with at least two ayahs per page), in exchange for pages between 0.96\x{} and 1.25\x{} stretch (Figure~\ref{fig:pages}).
+The price is visible in two places. Nazm stretches more on average (median 1.07\x), because the line width is set by the densest text in the book; and at the 25\% limit, one line in five is compressed partly by horizontal scaling, most visibly on the densest hizb (Al-Mujadila). Both trace to the compression side of the font: DigitalKhatt elongates gracefully but has few safe ways to contract a word inside a line. In juz 30, keeping every page evenly filled splits five short surahs across pages (each with at least two ayahs per page), in exchange for pages between 0.96\x{} and 1.25\x{} stretch (Fig.~\ref{fig:pages}).
 
 
 
@@ -304,10 +275,10 @@ Three limits remain. First, compression: a set of compression forms in DigitalKh
 \section{Conclusion}
 The Madina Mushaf's layout varies by much more than its hand: a third of its lines are off their natural length by over 10\%, and stroke weight follows the crowding. Quran-Nazm shows that the same hand, set by explicit rules, can hold every hizb to ten pages, end every page on an ayah, and cut the variation of lines within a page by 38\%. The program, data, measurements and the rendered Mushaf are available under a dual Waqf\,2.0/commercial licence~\cite{nazm}.
 
-\paragraph{Acknowledgements.} This work builds on DigitalKhatt by Amine Anane, the Tanzil project, HarfBuzz, fontTools~\cite{fonttools}, quran-meta and Amiri. The Madina Mushaf images are reproduced from the King Fahd Complex edition for analysis.
+\section*{Acknowledgment}
+This work builds on DigitalKhatt by Amine Anane, the Tanzil project, HarfBuzz, fontTools~\cite{fonttools}, quran-meta and Amiri. The Madina Mushaf images are reproduced from the King Fahd Complex edition for analysis.
 
-\small
-\bibliographystyle{plainnat}
+\bibliographystyle{IEEEtran}
 \bibliography{refs}
 
 \end{document}
