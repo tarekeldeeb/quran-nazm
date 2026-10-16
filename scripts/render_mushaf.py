@@ -789,7 +789,8 @@ def main():
     ends_ok = all(p["rows"][-1][0] == "text" and MARK in p["rows"][-1][1][-1] for p in book)
     starts_ok = all(not row[1][0].startswith(MARK) for p in book for row in p["rows"] if row[0] == "text")
     # within_page_spread: median over pages of the standard deviation of log(stretch)
-    # across the page's lines (hizbs 1-58); 0.065 is the same measure on the 1441H print.
+    # across the page's lines (hizbs 1-58); 0.063 is the same measure on the 1441H print
+    # (pages with at least 10 full lines, as in the paper).
     rep = dict(pages=len(book), rendered=f"{lo}-{hi}", shrink_limit=args.shrink, line_width_units=round(W),
                type_size_vs_madina=round(15437.6 / W, 3),
                stretch_median=round(float(np.median(r)), 3), stretch_p5=round(float(np.percentile(r, 5)), 3),
@@ -803,7 +804,7 @@ def main():
                                                                       for _, x in txt.units(sn, a)], W, txt.sp) <= LINES],
                within_page_spread=round(float(np.median([np.std(np.log([W / r[2] for r in p["rows"] if r[0] == "text" and W / r[2] <= 1.8]))
                                                          for p in book if p["hizb"] <= 58])), 3),
-               within_page_spread_madina_1441h=0.065,
+               within_page_spread_madina_1441h=0.063,
                collisions_cleared_by_spacing=stats["cleared"],
                word_collisions=len(stats["collisions"]),
                word_collision_examples=stats["collisions"][:10])

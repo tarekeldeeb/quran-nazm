@@ -60,11 +60,11 @@ Effect on evenness (standard deviation of log stretch):
 
 | | Madina 1441H | Nazm |
 |---|---|---|
-| Inside a page | 0.065 | **0.039** (−40%) |
+| Inside a page | 0.063 | **0.039** (−38%) |
 | Neighbouring pages (median difference) | 0.051 | 0.046 |
 | Between hizbs | n/a | 0.085 |
 
-Line harmony on a page, what a reader sees, improves by 40%. What remains is the hizb-to-hizb length difference; it changes gradually and never shows within a spread.
+Line harmony on a page, what a reader sees, improves by 38% (median over pages of the standard deviation of log stretch, pages with at least 10 full lines; an earlier variant of the measure gave 0.065 for the print). What remains is the hizb-to-hizb length difference; it changes gradually and never shows within a spread.
 
 ## 6. Shrink limit
 
@@ -93,7 +93,7 @@ The shrink limit sets the type size and where stretch is centred, not the evenne
 | Lines compressed | 27% |
 | Lines squeezed horizontally | 21%, at most 24% |
 | Words whose ink touches a neighbour | 0 (checked on every line) |
-| Line evenness inside a page | 0.039 (Madina 0.065) |
+| Line evenness inside a page | 0.039 (Madina 0.063) |
 | Every page ends on an ayah | yes |
 | No line starts with an ayah marker | yes |
 | Juz 30 page density (average stretch) | 0.96× to 1.25× |
