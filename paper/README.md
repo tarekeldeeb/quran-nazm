@@ -11,6 +11,10 @@ LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmar
 | `figures/` | charts (vector PDF), Nazm pages (vector PDF, cut from `output/quran-nazm.pdf`) and Madina print crops (PNG) |
 | `main.pdf` | the compiled paper |
 
+## Version
+
+The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.1.0) and printed as a footnote to the title. Bump it on each revision.
+
 ## Build
 
 ```bash
