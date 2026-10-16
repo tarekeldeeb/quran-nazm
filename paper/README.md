@@ -1,4 +1,4 @@
-# Paper: Quran-Nazm, rule-based typesetting of the Madina Mushaf
+# Paper: Quran-Nazm: Rule-Based Quran Typesetting that Reduces the Layout Variance of the Madina Mushaf
 
 LaTeX sources of the article introducing Quran-Nazm (two columns, A4, six pages).
 
