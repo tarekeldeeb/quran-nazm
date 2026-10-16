@@ -91,21 +91,24 @@ The shrink limit sets the type size and where stretch is centred, not the evenne
 | Type size | 93% of Madina 1441H |
 | Line stretch | median 1.07×, 5th–95th percentile 0.89–1.29×, worst 1.79× |
 | Lines compressed | 27% |
-| Lines squeezed horizontally | 14%, at most 24% |
+| Lines squeezed horizontally | 21%, at most 24% |
+| Words whose ink touches a neighbour | 0 (checked on every line) |
 | Line evenness inside a page | 0.039 (Madina 0.065) |
 | Every page ends on an ayah | yes |
 | No line starts with an ayah marker | yes |
 | Short surahs split across pages | 1 of 29 in juz 30 (Al-Balad) |
 
-The renderer starts every surah on a new line, which balances lines within surah segments and gives slightly larger type (93%) than the analysis model (90%), at the cost of more squeezed lines (14% vs 8%).
+The renderer starts every surah on a new line, which balances lines within surah segments and gives slightly larger type (93%) than the analysis model (90%), at the cost of more squeezed lines (21% vs 8%; see Collisions below).
 
 **Juz 30.** Its two hizbs share exactly 24 pages. Because each short surah starts on a new line under a two-line header, a page there is judged by the lines it really needs at the common width rather than by text length, and a page may never need more than the 25% shrink limit. Splitting a surah that would fit on one page is made far more costly than any imbalance, so 28 of the 29 such surahs stay whole on a page. Al-Balad (90) is the one that cannot, at 24 pages; 25 pages would keep all 29 whole, with looser lines on the sparsest pages (worst stretch 2.2×).
+
+**Collisions.** The first full render had words running into each other on compressed lines (page 18 was reported). The cause was the font's word-shrink features (`shr1`, `shrr`), which the quran-madina-html justifier applies word by word: shaped inside a whole line they shift a word into its neighbour (page 18: اذكروا into إسرائيل, إماما into للناس) or squash letters within it (واتخذوا, ءامنا). The renderer no longer uses them; a line that must compress tightens its spaces to at most 60% and is then scaled horizontally, which raised the share of horizontally squeezed lines from 14% to 21%. Every line is now checked for real ink contact between neighbouring words: candidate pairs come from intersecting glyph boxes and are confirmed by rasterising their outlines. Ten remaining contacts, almost all a small pause mark (ۚ ۗ ۖ) touching the tall stroke of a following كذلك or كمثل, are cleared by widening only that space; the report shows 0 collisions left.
 
 **Surah headers** are drawn as vector art: a pale ribbon between two fine rules, a central cartouche with pointed ends and a double outline holding the surah name, a small diamond on each side, and an eight-pointed star at each end.
 
 ## 8. Open points
 
-- **Horizontal squeeze.** At 25%, about one line in eight is scaled horizontally, visibly on dense pages such as page 541 (Al-Mujadila 1–7). Two remedies: a lower limit (squeeze is rare at 20%), or new compression forms in DigitalKhatt (narrower alternates, tighter ligatures, shorter tails) so shrinking stays calligraphic.
+- **Horizontal squeeze.** At 25%, about one line in five is scaled horizontally, visibly on dense pages such as page 541 (Al-Mujadila 1–7). Two remedies: a lower limit (squeeze is rare at 20%), or compression forms in DigitalKhatt that are safe inside a full line (the existing `shr1`/`shrr` collide; see Collisions), so shrinking stays calligraphic.
 - **Hizb 55** (from Al-Mujadila) is the densest hizb and dominates the compressed end; making it an exception would relieve it.
 - **Al-Balad (90)** is split across pages 593–594 at 24 pages for juz 30; 25 pages would avoid it.
 - **Scan resolution.** Pen-weight figures would sharpen with a 300 ppi scan.

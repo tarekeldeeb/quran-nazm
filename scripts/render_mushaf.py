@@ -495,6 +495,178 @@ def surah_header_art(x0, width, cy, h):
     return " ".join(ops)
 
 
+def justify(font, text, width):
+    """Justify one line to `width`.
+
+    Stretching uses the DigitalKhatt rules from quran-madina-html. Compressing
+    tightens the spaces (to 60% at most) and then scales the line horizontally.
+    The font's word-shrink features (shr1/shrr) are deliberately not used: shaped
+    inside a full line they push neighbouring words into each other and squash
+    letters within the word (the collisions first seen on page 18)."""
+    r = J.justify_line(font, text, width)
+    if not r.word_features and r.x_scale >= 1.0:
+        return r
+    line = J.analyze_line(text)
+    sp = J.width(font, " ")
+    nat = r.natural_width
+    n_simple = sum(1 for t in line.spaces.values() if t == "simple")
+    simple, cur = sp, nat
+    if n_simple:
+        simple = max(sp * J.MIN_SPACE_RATIO, sp - (nat - width) / n_simple)
+        cur = nat - (sp - simple) * n_simple
+        if cur < width:  # spaces alone were enough: give the remainder back
+            simple += (width - cur) / n_simple
+            cur = width
+    xs = min(1.0, width / cur)
+    return J.JustResult({}, simple, sp * J.AYA_SPACE, xs, nat, cur * xs, {})
+
+
+class FlattenPen(BasePen):
+    """Glyph outline as polygons (curves flattened), for rasterising ink."""
+
+    def __init__(self, glyphset, steps=6):
+        super().__init__(glyphset)
+        self.polys, self.cur, self.steps = [], [], steps
+
+    def _moveTo(self, p):
+        self.cur = [p]
+
+    def _lineTo(self, p):
+        self.cur.append(p)
+
+    def _curveToOne(self, a, b, c):
+        p0 = self.cur[-1]
+        for i in range(1, self.steps + 1):
+            t = i / self.steps
+            u = 1 - t
+            self.cur.append((u**3 * p0[0] + 3 * u * u * t * a[0] + 3 * u * t * t * b[0] + t**3 * c[0],
+                             u**3 * p0[1] + 3 * u * u * t * a[1] + 3 * u * t * t * b[1] + t**3 * c[1]))
+
+    def _closePath(self):
+        if len(self.cur) > 2:
+            self.polys.append(self.cur)
+        self.cur = []
+
+
+class InkCheck:
+    """Finds neighbouring words whose ink actually touches on a set line.
+
+    Candidates come from glyph boxes that intersect; each candidate pair is then
+    rasterised (5 font units per pixel) and counted as a collision only when the
+    two words share inked pixels."""
+
+    def __init__(self, font_path, tolerance=30, unit=5, min_pixels=3):
+        from fontTools.pens.boundsPen import BoundsPen
+        tt = TTFont(font_path)
+        self.gs, self.order, self.pen = tt.getGlyphSet(), tt.getGlyphOrder(), BoundsPen
+        self.cache, self.polys, self.tol = {}, {}, tolerance
+        self.unit, self.min_pixels = unit, min_pixels
+
+    def outline(self, gid):
+        if gid not in self.polys:
+            pen = FlattenPen(self.gs)
+            self.gs[self.order[gid]].draw(pen)
+            self.polys[gid] = pen.polys
+        return self.polys[gid]
+
+    def ink_overlap(self, g1, g2):
+        """Shared inked pixels of two glyph lists [(gid, x, y)] in font units."""
+        from PIL import Image, ImageDraw
+        pts = [(x + px, y + py) for gid, x, y in g1 + g2 for poly in self.outline(gid) for px, py in poly]
+        if not pts:
+            return 0
+        x0, y0 = min(p[0] for p in pts), min(p[1] for p in pts)
+        x1, y1 = max(p[0] for p in pts), max(p[1] for p in pts)
+        size = (int((x1 - x0) / self.unit) + 3, int((y1 - y0) / self.unit) + 3)
+        masks = []
+        for glyphs in (g1, g2):
+            im = Image.new("1", size, 0)
+            d = ImageDraw.Draw(im)
+            for gid, x, y in glyphs:
+                for poly in self.outline(gid):
+                    d.polygon([((x + px - x0) / self.unit + 1, (y1 - y - py) / self.unit + 1) for px, py in poly], fill=1)
+            masks.append(np.array(im, dtype=bool))
+        return int((masks[0] & masks[1]).sum())
+
+    def bounds(self, gid):
+        if gid not in self.cache:
+            pen = self.pen(self.gs)
+            self.gs[self.order[gid]].draw(pen)
+            self.cache[gid] = pen.bounds
+        return self.cache[gid]
+
+    def collisions(self, font, text, res, extra=None):
+        """Pairs of neighbouring words where a glyph of one overlaps a glyph of the
+        other in both directions by more than the tolerance. Whole-word boxes are
+        not enough: in this hand a descender often tucks under the next word."""
+        line = J.analyze_line(text)
+        feats = {k: dict(v) for k, v in res.features.items()}
+        for wi, wf in res.word_features.items():
+            for idx in range(line.words[wi].start, line.words[wi].end + 1):
+                feats.setdefault(idx, {}).update(wf)
+        buf = J.shape(font, text, J.to_hb_features(feats))
+        x, boxes, glyphs = 0.0, {}, {}
+        for info, pos in zip(buf.glyph_infos, buf.glyph_positions):
+            kind = line.spaces.get(info.cluster)
+            adv = (res.aya_spacing if kind == "aya" else res.simple_spacing) if kind else pos.x_advance
+            if kind and extra:
+                adv += extra.get(info.cluster, 0)
+            b = self.bounds(info.codepoint)
+            if b and not kind:
+                wi = next(k for k, w in enumerate(line.words) if w.start <= info.cluster <= w.end)
+                ox, oy = x + pos.x_offset, pos.y_offset
+                boxes.setdefault(wi, []).append((ox + b[0], oy + b[1], ox + b[2], oy + b[3]))
+                glyphs.setdefault(wi, []).append((info.codepoint, ox, oy))
+            x += adv
+        out = []
+        for w1 in boxes:
+            w2 = w1 + 1
+            if w2 not in boxes:
+                continue
+            worst = 0
+            for a in boxes[w1]:
+                for c in boxes[w2]:
+                    ix = min(a[2], c[2]) - max(a[0], c[0])
+                    iy = min(a[3], c[3]) - max(a[1], c[1])
+                    if ix > self.tol and iy > self.tol:
+                        worst = max(worst, min(ix, iy))
+            if worst:
+                shared = self.ink_overlap(glyphs[w1], glyphs[w2])
+                if shared >= self.min_pixels:
+                    out.append((line.words[w1].text, line.words[w2].text, shared, line.words[w1].end + 1))
+        return out
+
+
+def line_glyphs(font, text, res, extra=None):
+    """As justify.line_glyphs, plus an optional extra advance for individual
+    spaces (keyed by the space's character index), used to clear collisions."""
+    line = J.analyze_line(text)
+    feats = {k: dict(v) for k, v in res.features.items()}
+    buf = J.shape(font, text, J.to_hb_features(feats))
+    out, x = [], 0.0
+    for info, pos in zip(buf.glyph_infos, buf.glyph_positions):
+        kind = line.spaces.get(info.cluster)
+        adv = (res.aya_spacing if kind == "aya" else res.simple_spacing) if kind else pos.x_advance
+        if kind and extra:
+            adv += extra.get(info.cluster, 0)
+        out.append((info.codepoint, x + pos.x_offset, pos.y_offset))
+        x += adv
+    return out, x
+
+
+def clear_collisions(ink, font, text, res, step=40, tries=8):
+    """Widen only the spaces where neighbouring words touch, step by step; the
+    line is then rescaled to its width. Returns (extra, collisions_left)."""
+    extra = {}
+    for _ in range(tries):
+        hits = ink.collisions(font, text, res, extra)
+        if not hits:
+            return extra, []
+        for *_, space in hits:
+            extra[space] = extra.get(space, 0) + step
+    return extra, ink.collisions(font, text, res, extra)
+
+
 def place(glyphs, x, y, k, xs, used, out, prefix="G"):
     for gid, gx, gy in glyphs:
         if gid == 0:
@@ -556,14 +728,21 @@ def render_page(pdf, txt, page, number, W, stats):
         ratio = W / nat
         if ratio > 1.8:  # a few words left over before a surah ends: centre them, do not over-stretch
             target = nat * 1.25
-            r = J.justify_line(txt.font, text, target)
+            r = justify(txt.font, text, target)
             g, x = J.line_glyphs(txt.font, text, r)
             place(g, x0 + BLOCK_W / 2 - x * k / 2, base, k, 1.0, used, out)
             stats["centred"] += 1
             continue
-        r = J.justify_line(txt.font, text, W)
-        g, x = J.line_glyphs(txt.font, text, r)
-        place(g, x0 + BLOCK_W - x * r.x_scale * k, base, k, r.x_scale, used, out)
+        r = justify(txt.font, text, W)
+        extra, left = clear_collisions(stats["ink"], txt.font, text, r)
+        g, x = line_glyphs(txt.font, text, r, extra)
+        xs = r.x_scale * (W / (x * r.x_scale)) if extra else r.x_scale  # absorb widened spaces
+        if extra:
+            stats["cleared"] += 1
+        for c in left:
+            stats["collisions"].append(dict(page=number, line=i + 1, words=list(c[:2]), overlap=c[2]))
+        place(g, x0 + BLOCK_W - x * xs * k, base, k, xs, used, out)
+        r.x_scale = xs
         stats["ratios"].append(ratio)
         stats["xscale"].append(r.x_scale)
     out.append("Q")
@@ -585,7 +764,7 @@ def main():
     if args.pages:
         lo, hi = (int(x) for x in args.pages.split("-"))
     pdf = Pdf()
-    stats = dict(ratios=[], xscale=[], centred=0)
+    stats = dict(ratios=[], xscale=[], centred=0, collisions=[], cleared=0, ink=InkCheck(FONT_PATH))
     for n in range(lo, hi + 1):
         render_page(pdf, txt, book[n - 1], n, W, stats)
         if n % 50 == 0:
@@ -610,7 +789,10 @@ def main():
                                                                       for _, x in txt.units(sn, a)], W, txt.sp) <= LINES],
                within_page_spread=round(float(np.median([np.std(np.log([W / r[2] for r in p["rows"] if r[0] == "text" and W / r[2] <= 1.8]))
                                                          for p in book if p["hizb"] <= 58])), 3),
-               within_page_spread_madina_1441h=0.065)
+               within_page_spread_madina_1441h=0.065,
+               collisions_cleared_by_spacing=stats["cleared"],
+               word_collisions=len(stats["collisions"]),
+               word_collision_examples=stats["collisions"][:10])
     base = os.path.splitext(args.out)[0]
     json.dump(rep, open(base + "-report.json", "w"), ensure_ascii=False, indent=1)
     json.dump([dict(page=i + 1, hizb=p["hizb"], first=list(p["ayahs"][0]), last=list(p["ayahs"][-1]),
