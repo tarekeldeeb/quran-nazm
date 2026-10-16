@@ -2,3 +2,8 @@ build/
 __pycache__/
 *.pyc
 quran-madina.pdf
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
