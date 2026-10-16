@@ -96,11 +96,12 @@ The shrink limit sets the type size and where stretch is centred, not the evenne
 | Line evenness inside a page | 0.039 (Madina 0.065) |
 | Every page ends on an ayah | yes |
 | No line starts with an ayah marker | yes |
-| Short surahs split across pages | 1 of 29 in juz 30 (Al-Balad) |
+| Juz 30 page density (average stretch) | 0.96× to 1.25× |
+| Short surahs split across pages | 5 of 29 (86, 92, 96, 98, 111), each with at least 2 ayahs on each page |
 
 The renderer starts every surah on a new line, which balances lines within surah segments and gives slightly larger type (93%) than the analysis model (90%), at the cost of more squeezed lines (21% vs 8%; see Collisions below).
 
-**Juz 30.** Its two hizbs share exactly 24 pages. Because each short surah starts on a new line under a two-line header, a page there is judged by the lines it really needs at the common width rather than by text length, and a page may never need more than the 25% shrink limit. Splitting a surah that would fit on one page is made far more costly than any imbalance, so 28 of the 29 such surahs stay whole on a page. Al-Balad (90) is the one that cannot, at 24 pages; 25 pages would keep all 29 whole, with looser lines on the sparsest pages (worst stretch 2.2×).
+**Juz 30.** Its two hizbs share exactly 24 pages. Because each short surah starts on a new line under a two-line header, a page there is judged by the lines it really needs at the common width rather than by text length. Three rules shape it: no page may need more than the 25% shrink limit; no page may be sparser than 1.35× average stretch; and a surah may only be split if at least two of its ayahs stay on each page. Within those rules, splitting a surah that would fit on one page is made far more costly than any imbalance. A first version without the sparseness rule kept 28 of 29 short surahs whole but left Al-A'la alone on a page at 1.52× stretch, which looked empty. With the rule, every juz 30 page lies between 0.96× and 1.25×, Al-A'la shares its page with the end of Al-Tariq at 1.06×, and five short surahs (86, 92, 96, 98, 111) span two pages. A 25th or 26th page does not avoid those splits.
 
 **Collisions.** The first full render had words running into each other on compressed lines (page 18 was reported). The cause was the font's word-shrink features (`shr1`, `shrr`), which the quran-madina-html justifier applies word by word: shaped inside a whole line they shift a word into its neighbour (page 18: اذكروا into إسرائيل, إماما into للناس) or squash letters within it (واتخذوا, ءامنا). The renderer no longer uses them; a line that must compress tightens its spaces to at most 60% and is then scaled horizontally, which raised the share of horizontally squeezed lines from 14% to 21%. Every line is now checked for real ink contact between neighbouring words: candidate pairs come from intersecting glyph boxes and are confirmed by rasterising their outlines. Ten remaining contacts, almost all a small pause mark (ۚ ۗ ۖ) touching the tall stroke of a following كذلك or كمثل, are cleared by widening only that space; the report shows 0 collisions left.
 
@@ -110,5 +111,5 @@ The renderer starts every surah on a new line, which balances lines within surah
 
 - **Horizontal squeeze.** At 25%, about one line in five is scaled horizontally, visibly on dense pages such as page 541 (Al-Mujadila 1–7). Two remedies: a lower limit (squeeze is rare at 20%), or compression forms in DigitalKhatt that are safe inside a full line (the existing `shr1`/`shrr` collide; see Collisions), so shrinking stays calligraphic.
 - **Hizb 55** (from Al-Mujadila) is the densest hizb and dominates the compressed end; making it an exception would relieve it.
-- **Al-Balad (90)** is split across pages 593–594 at 24 pages for juz 30; 25 pages would avoid it.
+- **Juz 30 splits.** Five short surahs span two pages to keep every page evenly filled; ornamental continuation marks or a different header size could let more stay whole.
 - **Scan resolution.** Pen-weight figures would sharpen with a 300 ppi scan.

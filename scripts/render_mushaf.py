@@ -230,10 +230,12 @@ def lines_needed(ws, width, sp):
 
 
 JUZ30_PAGES = 24
+MIN_SPLIT_AYAHS = 2      # juz 30: a split surah keeps at least this many ayahs on each page
+JUZ30_MAX_STRETCH = 1.35 # juz 30: no page may be sparser than this average stretch
 SPLIT_SHORT_SURA = 25.0  # juz 30: cost of splitting a surah that fits on one page (vs. ~0.01 for a typical page)
 
 
-def juz30_pages(txt, ayahs, pages, W, shrink):
+def juz30_pages(txt, ayahs, pages, W, shrink, max_stretch=None):
     """Juz 30 on exactly `pages` pages. Its many short surahs each start on a new
     line, so a page is scored by the lines it really needs at width W: every
     surah segment is cut separately, and the page's average stretch should be
@@ -265,7 +267,10 @@ def juz30_pages(txt, ayahs, pages, W, shrink):
         avail = LINES - heads
         if avail < len(segs):
             return None
-        return math.log(avail * W / text) ** 2
+        stretch = avail * W / text
+        if max_stretch and stretch > max_stretch:
+            return "sparse"  # too little text: the page would look empty
+        return math.log(stretch) ** 2
 
     INF = 1e30
     cost = {}
@@ -274,10 +279,19 @@ def juz30_pages(txt, ayahs, pages, W, shrink):
             c = page_cost(j, i)
             if c is None:
                 break
+            if c == "sparse":
+                continue
             if i < n:
                 s_prev, s_next = ayahs[i - 1][0], ayahs[i][0]
-                if s_prev == s_next and s_prev in small:
-                    c += SPLIT_SHORT_SURA
+                if s_prev == s_next:
+                    # never leave a surah's header with fewer than 3 ayahs at a page
+                    # bottom, nor carry fewer than 3 ayahs over to the next page
+                    before = ayahs[i - 1][1]
+                    after = len(txt.suras[s_prev - 1]["ayas"]) - before
+                    if before < MIN_SPLIT_AYAHS or after < MIN_SPLIT_AYAHS:
+                        continue
+                    if s_prev in small:
+                        c += SPLIT_SHORT_SURA
             cost[j, i] = c
     best = np.full((pages + 1, n + 1), INF)
     back = np.zeros((pages + 1, n + 1), int)
@@ -308,7 +322,7 @@ def build_layout(txt, shrink):
     # Juz 30, the exception: both hizbs together on a fixed number of pages
     a0, a1 = ranges[58][0], ranges[59][1]
     hz60 = ranges[59][0]
-    for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES, W, shrink):
+    for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES, W, shrink, JUZ30_MAX_STRETCH):
         idx = txt.flat.index(pa[0]) + 1
         book.append(dict(hizb=59 if idx < hz60 else 60, ayahs=pa, rows=page_rows(txt, pa)))
     return book, W, longest
