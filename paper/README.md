@@ -1,6 +1,6 @@
 # Paper: Quran-Nazm: Reducing Layout Variance in Quran Typesetting
 
-LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmart`, `sigconf`), currently six pages. The planned 4- and 10-page versions are described in [`VERSIONS.md`](VERSIONS.md). The earlier IEEE version is commit `04bd8fe`.
+LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmart`, `sigconf`): the full-paper version, 9 pages including references. The planned 4- and 10-page versions are described in [`VERSIONS.md`](VERSIONS.md). The earlier IEEE version is commit `04bd8fe`.
 
 | File | Content |
 |---|---|

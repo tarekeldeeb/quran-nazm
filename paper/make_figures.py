@@ -119,6 +119,28 @@ ax.set_ylabel("hizbs")
 ax.legend(loc="upper right", ncol=1, bbox_to_anchor=(1.0, 1.02))
 save(fig, "fig_hizb.pdf")
 
+# 3b. Length of rub', half hizb, hizb and juz relative to their mean (the root variance)
+T = np.array([o["T"] for o in data("rub_minmax.json")])
+fig, ax = plt.subplots(figsize=(W1, 1.65))
+units = [(1, "rub'\n(240)"), (2, "half hizb\n(120)"), (4, "hizb\n(60)"), (8, "juz\n(30)")]
+rng = np.random.default_rng(1)
+for k, (n, lab) in enumerate(units):
+    g = np.array([T[i:i + n].sum() for i in range(0, 240, n)])
+    v = g / g.mean()
+    y = k + rng.uniform(-0.18, 0.18, len(v))
+    ax.scatter(v, y, s=4 if n < 4 else 7, color=GREEN if n in (4, 8) else GREY, linewidths=0)
+    ax.plot([v.min(), v.max()], [k + 0.32, k + 0.32], color=INK, lw=0.6)
+    ax.text(v.max() + 0.02, k + 0.32, f"{v.max() / v.min():.2f}×  (cv {g.std() / g.mean():.3f})",
+            va="center", fontsize=6.5)
+ax.set_yticks(range(4), [u[1] for u in units])
+ax.invert_yaxis()
+ax.axvline(1.0, color=INK, lw=0.6, ls=(0, (3, 2)))
+ax.set_xlim(0.55, 1.95)
+ax.set_xlabel("length of the unit ÷ mean length of its kind")
+ax.spines["left"].set_visible(False)
+ax.tick_params(axis="y", length=0)
+save(fig, "fig_units.pdf")
+
 # 4. Line stretch: Madina 1441H vs Nazm (all lines, and spread inside each page)
 mad_pages = {}
 for o in m:
@@ -149,9 +171,42 @@ fig.legend(h, l, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.0))
 save(fig, "fig_stretch.pdf")
 print(f"medians: Madina {np.median(sd_m):.3f}, Nazm {np.median(sd_n):.3f}")
 
+# 4b. Mean stretch of each hizb in the final layout (the variance left between hizbs)
+ab = data("ablations.json")
+ph = np.array(ab["per_hizb_mean_stretch"])
+fig, ax = plt.subplots(figsize=(W1, 1.55))
+cols = [CORAL if v == ph.max() or v == ph.min() else GREEN for v in ph]
+ax.bar(np.arange(1, len(ph) + 1), ph, color=cols, width=0.75)
+ax.axhline(1.0, color=INK, lw=0.6, ls=(0, (3, 2)))
+ax.set_ylim(0.8, ph.max() + 0.1)
+hmax, hmin = int(np.argmax(ph)) + 1, int(np.argmin(ph)) + 1
+ax.text(hmax, ph[hmax - 1] + 0.015, f"hizb {hmax}", ha="center", fontsize=6.5, color=CORAL)
+ax.annotate(f"hizb {hmin}", xy=(hmin, ph[hmin - 1]), xytext=(hmin - 3, ph.max() + 0.04), ha="center",
+            fontsize=6.5, color=CORAL, arrowprops=dict(arrowstyle="-", color=CORAL, lw=0.5))
+ax.set_xlabel("hizb")
+ax.set_ylabel("mean stretch")
+ax.set_xticks([1, 10, 20, 30, 40, 50, 58])
+save(fig, "fig_hizb_stretch.pdf")
+
+# 4c. Average pen width of every all-text page of the scan (page-level drift)
+pages_sw = {}
+for o in data("w_1441H.json"):
+    pages_sw.setdefault(o["p"], []).append(o["sw"])
+pn = np.array(sorted(pages_sw))
+pw = np.array([np.mean(pages_sw[p]) for p in pn])
+fig, ax = plt.subplots(figsize=(W1, 1.45))
+ax.scatter(pn, pw, s=2.5, color=GREY, linewidths=0)
+for p_, lab in ((561, "p. 561"), (563, "p. 563")):
+    i = int(np.where(pn == p_)[0][0])
+    ax.scatter([p_], [pw[i]], s=12, color=CORAL if p_ == 561 else GREEN, zorder=3)
+    ax.annotate(lab, (p_, pw[i]), xytext=(-24, 4 if p_ == 561 else -9), textcoords="offset points", fontsize=6.5)
+ax.set_xlabel("page of the print")
+ax.set_ylabel("pen width (px)")
+save(fig, "fig_page_drift.pdf")
+
 # 5. Pages of the Nazm render as vector PDF pages, and crops of the Madina print
 src = pymupdf.open(os.path.join(ROOT, "output", "quran-nazm.pdf"))
-for n in (1, 2, 156, 590, 591):
+for n in (1, 2, 156, 412, 541, 590, 591):
     one = pymupdf.open()
     one.insert_pdf(src, from_page=n - 1, to_page=n - 1)
     one.save(os.path.join(OUT, f"nazm-p{n:03d}.pdf"))

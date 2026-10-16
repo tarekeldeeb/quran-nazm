@@ -1,5 +1,7 @@
 # Two versions of the paper: 4 and 10 pages
 
+**Status (October 2026):** `main.tex` is now the full-paper version, 9 pages including references, with about one page kept free for the reader study and the re-measurement on the King Fahd Complex vector masters. Section order: introduction, related work, the root variance of the reading units, how the Madina print absorbs it, design, implementation, evaluation with ablations, reproducibility, limitations. The 4-page version is not built; derive it from `main.tex` only if needed.
+
 The current `main.tex` is a 6-page ACM `sigconf` paper. DocEng accepts **full papers up to 10 pages** and **short papers up to 4 pages** (plus 2-page demonstration abstracts), all in the ACM format. Whether references count toward those limits is not stated in the parts of the call we read; plan for references *inside* the limit until the 2027 call says otherwise.
 
 The same work cannot go to both tracks of the same DocEng. The two versions serve different moments:
