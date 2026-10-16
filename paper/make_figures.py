@@ -21,12 +21,28 @@ OUT = os.path.join(HERE, "figures")
 os.makedirs(OUT, exist_ok=True)
 
 GREEN, CORAL, GREY, INK = "#2F6B55", "#C2412D", "#9AA59F", "#1B2420"
-for path in ("/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyretermes-regular.otf",
-             "/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyretermes-bold.otf"):
-    if os.path.exists(path):
-        font_manager.fontManager.addfont(path)
+
+
+def find_font(names):
+    """First installed font file whose name matches, in order of preference."""
+    files = font_manager.findSystemFonts() + font_manager.findSystemFonts(
+        fontpaths=["/usr/share/texmf/fonts/opentype", "/usr/share/texlive/texmf-dist/fonts/opentype"])
+    for name in names:
+        for f in files:
+            if os.path.basename(f).lower() == name.lower():
+                return f
+    return None
+
+
+# Charts use the body face of the ACM template (Linux Libertine); TeX Gyre Termes as fallback.
+TEXT_FONT = find_font(["LinLibertine_R.otf", "texgyretermes-regular.otf"])
+for name in ("LinLibertine_R.otf", "LinLibertine_RB.otf", "texgyretermes-regular.otf", "texgyretermes-bold.otf"):
+    f = find_font([name])
+    if f:
+        font_manager.fontManager.addfont(f)
+FAMILY = font_manager.FontProperties(fname=TEXT_FONT).get_name() if TEXT_FONT else "serif"
 plt.rcParams.update({
-    "font.family": "TeX Gyre Termes", "font.size": 8.5, "axes.titlesize": 9,
+    "font.family": FAMILY, "font.size": 8.5, "axes.titlesize": 9,
     "axes.labelsize": 8.5, "xtick.labelsize": 7.5, "ytick.labelsize": 7.5,
     "axes.spines.top": False, "axes.spines.right": False, "axes.edgecolor": "#555",
     "axes.linewidth": 0.6, "xtick.major.width": 0.6, "ytick.major.width": 0.6,
@@ -154,7 +170,25 @@ from paths import QMH, WORK  # noqa: E402
 sys.path.insert(0, os.path.join(QMH, "src", "db", "v2"))
 import uharfbuzz as hb  # noqa: E402
 import justify as J  # noqa: E402
-from render_svg import GlyphPaths  # noqa: E402
+from fontTools.pens.svgPathPen import SVGPathPen  # noqa: E402
+from fontTools.pens.transformPen import TransformPen  # noqa: E402
+from fontTools.ttLib import TTFont  # noqa: E402
+
+
+class GlyphPaths:
+    """SVG path data for glyph ids of one font (y axis flipped), cached."""
+
+    def __init__(self, path):
+        tt = TTFont(path)
+        self.gs, self.order, self.cache = tt.getGlyphSet(), tt.getGlyphOrder(), {}
+
+    def path(self, gid):
+        if gid not in self.cache:
+            pen = SVGPathPen(self.gs)
+            self.gs[self.order[gid]].draw(TransformPen(pen, (1, 0, 0, -1, 0, 0)))
+            self.cache[gid] = pen.getCommands()
+        return self.cache[gid]
+
 
 font_path = os.path.join(WORK, "madina.otf")
 font = hb.Font(hb.Face(open(font_path, "rb").read()))
@@ -189,14 +223,13 @@ svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{left} 0 {right-left} 
        f'width="{(right-left)/60:.0f}" height="{H/60:.0f}">' + "".join(parts) + "</svg>")
 doc = pymupdf.open(stream=svg.encode(), filetype="svg")
 fig = pymupdf.open("pdf", doc.convert_to_pdf())
-# percentage labels are drawn afterwards with an embedded TeX Gyre Termes, so
-# the figure carries no unembedded fonts (required for IEEE submission)
+# percentage labels are drawn afterwards with an embedded copy of the text face,
+# so the figure carries no unembedded fonts (required by ACM and IEEE)
 page = fig[0]
-termes = "/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyretermes-regular.otf"
-page.insert_font(fontname="termes", fontfile=termes)
+page.insert_font(fontname="label", fontfile=TEXT_FONT)
 sx = page.rect.width / (right - left)
 for x_u, y_u, label, col in labels:
-    page.insert_text(((x_u - left) * sx, y_u * sx), label, fontname="termes", fontsize=720 * sx,
+    page.insert_text(((x_u - left) * sx, y_u * sx), label, fontname="label", fontsize=720 * sx,
                      color=tuple(int(col[i:i + 2], 16) / 255 for i in (1, 3, 5)))
 fig.save(os.path.join(OUT, "fig_p156_natural.pdf"), garbage=3, deflate=True)
 print("figure: fig_p156_natural.pdf")

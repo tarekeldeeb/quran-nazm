@@ -1,9 +1,10 @@
-# Build the Quran-Nazm paper. Requires XeLaTeX, BibTeX and the TeX Gyre fonts.
-main.pdf: main.tex refs.bib IEEEtran.cls IEEEtran.bst $(wildcard figures/*)
-	xelatex -interaction=nonstopmode main.tex
+# Build the Quran-Nazm paper (ACM acmart, sigconf). Requires pdfLaTeX, BibTeX and the
+# libertine, newtx and inconsolata packages (all in a full TeX Live).
+main.pdf: main.tex refs.bib acmart.cls ACM-Reference-Format.bst $(wildcard figures/*)
+	pdflatex -interaction=nonstopmode main.tex
 	bibtex main
-	xelatex -interaction=nonstopmode main.tex
-	xelatex -interaction=nonstopmode main.tex
+	pdflatex -interaction=nonstopmode main.tex
+	pdflatex -interaction=nonstopmode main.tex
 
 figures:
 	python3 make_figures.py
