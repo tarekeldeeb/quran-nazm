@@ -13,7 +13,12 @@ LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmar
 
 ## Version
 
-The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.1.0) and printed as a footnote to the title. Bump it on each revision.
+The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.2.0) and printed as a footnote to the title. Bump it on each revision.
+
+| Version | Changes |
+|---|---|
+| v0.2.0 | Nazm pages use the Hafs al-'Adi page frame and surah headers of quran-assets (CC BY-NC-SA 4.0), so the teaser compares the two text blocks inside the same frame; Output paragraph, captions, Limitations (Design), conclusion and acknowledgements updated; quran-assets cited. Results unchanged. |
+| v0.1.0 | First ACM full-paper version: root variance of the reading units (Section 3), Giza affiliation, Measurement limitation removed. |
 
 ## Build
 

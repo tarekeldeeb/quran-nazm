@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.1.0}% bump on each revision
+\newcommand{\paperversion}{v0.2.0}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -50,8 +50,8 @@ Printed Qurans are organised in reading units (the juz, the hizb and its quarter
     \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p156.pdf}
     \caption{Quran-Nazm, page 156.}
   \end{subfigure}
-  \Description{Two Quran pages side by side holding the same passage. The printed page has crowded lines at the top and spaced-out lines at the bottom; the Nazm page has evenly filled lines inside a decorative frame with running heads.}
-  \caption{The same passage (Al-A'raf 44 onward) in the Madina print and in Quran-Nazm. In the print, line~11 carries 25\% more text than fits at natural size while the lowest lines are spaced out; in Nazm the lines of a page carry equal shares of text.}
+  \Description{Two Quran pages side by side holding the same passage. The printed page has crowded lines at the top and spaced-out lines at the bottom; the Nazm page, inside the same green Madina frame, has evenly filled lines and running heads.}
+  \caption{The same passage (Al-A'raf 44 onward) in the Madina print and in Quran-Nazm. In the print, line~11 carries 25\% more text than fits at natural size while the lowest lines are spaced out; in Nazm the lines of a page carry equal shares of text. Both pages use the same Hafs frame, so only the text block differs.}
   \label{fig:teaser}
 \end{teaserfigure}
 
@@ -308,7 +308,7 @@ The whole book shares one line width $W=(1-\sigma)\max_\ell w_\ell$, where $w_\e
     \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p001.pdf}
     \caption{Page 1: Al-Fatiha, Al-Baqara.}
   \end{subfigure}
-  \Description{Three typeset Quran pages with framed borders, ornamented surah headers and evenly filled lines.}
+  \Description{Three typeset Quran pages in the green Madina page frame, with Madina surah header cartouches and evenly filled lines.}
   \caption{Quran-Nazm pages. Each surah begins on a new line under its header; lines of a page carry equal text; every page ends on an ayah.}
   \label{fig:pages}
 \end{figure*}
@@ -461,10 +461,10 @@ Everything in this paper is generated from public inputs by the scripts in the Q
 
 \paragraph{Readers.} Our measures are geometric. A planned reader study will have Quran teachers, calligraphers and regular readers rank paired pages of the print and of Nazm, blind to their source, for evenness, legibility and beauty.
 
-\paragraph{Design.} Surah headers and the treatment of juz~30 are design choices open to calligraphers' review. Redefining the reading units to equal lengths would remove the root variance, but that is beyond the typesetter's remit.
+\paragraph{Design.} The page frame and surah headers reuse the ornaments of the Complex's standard Hafs print, traced as vector art by quran-assets; their licence is provisional until the Complex grants permission, so the renderer keeps its own frame and headers as an alternative. The treatment of juz~30 is a design choice open to calligraphers' review. Redefining the reading units to equal lengths would remove the root variance, but that is beyond the typesetter's remit.
 
 \section{Conclusion}
-Unequal reading units are the root of layout variance in every Mushaf. The Madina print fixes the juz, the most forgiving unit, and still absorbs its share by hand: a third of its lines are off their natural length by over 10\%, and stroke weight follows the crowding. Quran-Nazm fixes the stricter unit of ten pages per hizb and absorbs the larger variance by explicit rules: every page ends on an ayah, no word collides with its neighbour, and the variation of lines within a page falls by 38\%. The program, data, measurements and the rendered Mushaf are available under a dual Waqf\,2.0/commercial licence~\cite{nazm}.
+Unequal reading units are the root of layout variance in every Mushaf. The Madina print fixes the juz, the most forgiving unit, and still absorbs its share by hand: a third of its lines are off their natural length by over 10\%, and stroke weight follows the crowding. Quran-Nazm fixes the stricter unit of ten pages per hizb and absorbs the larger variance by explicit rules: every page ends on an ayah, no word collides with its neighbour, and the variation of lines within a page falls by 38\%. The program, data, measurements and the rendered Mushaf are available under a dual Waqf\,2.0/commercial licence~\cite{nazm}; the frame and header art keeps its own CC BY-NC-SA~4.0 terms.
 
 \begin{acks}
 This work builds on DigitalKhatt by Amine Anane, the Tanzil project, HarfBuzz, fontTools~\cite{fonttools}, quran-meta and Amiri. The page frame and surah header art comes from quran-assets by quran.ws (CC BY-NC-SA~4.0). The Madina Mushaf images are reproduced from the King Fahd Complex edition for analysis.
