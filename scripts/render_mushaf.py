@@ -236,6 +236,20 @@ def titles_ok(segs):
     return all(r <= TITLE_MAX_ROW for r in title_rows(segs))
 
 
+PAGES_PER_JUZ = 20
+JUZ30_PAGES_AS_JUZ = 24  # --unit juz: juz 30 cannot fit 20 pages under the title rule; 24 keeps the book at 604
+
+
+def juz_ranges():
+    starts = json.load(open(os.path.join(DATA, "hafs-rub-start-ayahs.json")))
+    return [(starts[1 + 8 * j], starts[1 + 8 * j + 8] if j < 29 else 6237) for j in range(30)]
+
+
+def hizb_of(txt, ayah, ranges=None):
+    i = txt.flat.index(ayah) + 1
+    return next(h + 1 for h, (a0, a1) in enumerate(ranges or hizb_ranges()) if a0 <= i < a1)
+
+
 def hizb_ranges():
     starts = json.load(open(os.path.join(DATA, "hafs-rub-start-ayahs.json")))
     return [(starts[1 + 4 * h], starts[1 + 4 * h + 4] if h < 59 else 6237) for h in range(60)]
@@ -405,7 +419,9 @@ def juz30_pages(txt, ayahs, pages, W, shrink, max_stretch=None, title_rule=True,
     return [ayahs[a:b] for a, b in zip(cuts[:-1], cuts[1:])]
 
 
-def build_layout(txt, shrink):
+def build_layout(txt, shrink, unit="juz"):
+    if unit == "juz":
+        return build_layout_juz(txt, shrink)
     ranges = hizb_ranges()
     book = []  # list of dict(hizb, ayahs, rows)
     for h in range(58):
@@ -422,6 +438,26 @@ def build_layout(txt, shrink):
             book.append(dict(hizb=h, ayahs=pa,
                              rows=page_rows(txt, pa, fit_width=W / (1 - shrink) if TITLE_RULE else None)))
     return book, W, longest
+
+
+def build_layout_juz(txt, shrink):
+    """Every juz on exactly 20 pages (juz 30 on 24); hizbs start wherever the text puts them."""
+    hz = hizb_ranges()
+    book = []
+    for j, (a0, a1) in enumerate(juz_ranges()[:29]):
+        for pa in fixed_pages(txt, txt.flat[a0 - 1:a1 - 1], PAGES_PER_JUZ, TITLE_RULE):
+            book.append(dict(hizb=hizb_of(txt, pa[0], hz), juz=j + 1, ayahs=pa, rows=page_rows(txt, pa)))
+    longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
+    W = longest * (1 - shrink)
+    a0, a1 = juz_ranges()[29]
+    for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES_AS_JUZ, W, shrink, JUZ30_MAX_STRETCH, TITLE_RULE):
+        book.append(dict(hizb=hizb_of(txt, pa[0], hz), juz=30, ayahs=pa,
+                         rows=page_rows(txt, pa, fit_width=W / (1 - shrink) if TITLE_RULE else None)))
+    return book, W, longest
+
+
+def in_juz30(p):
+    return p.get("juz", 30 if p["hizb"] >= 59 else 0) == 30
 
 
 def split_short_suras(txt, book):
@@ -606,20 +642,29 @@ def surah_header_art(x0, width, cy, h):
     return " ".join(ops)
 
 
+SHRINK_TAGS = {"shr1", "shr2", "shrr"}  # the font's shrinking features: never used
+
+
 def justify(font, text, width):
     """Justify one line to `width`.
 
     Stretching uses the DigitalKhatt rules from quran-madina-html. Compressing
     tightens the spaces (to 60% at most) and then scales the line horizontally.
-    The font's word-shrink features (shr1/shrr) are deliberately not used: shaped
-    inside a full line they push neighbouring words into each other and squash
-    letters within the word (the collisions first seen on page 18)."""
-    r = J.justify_line(font, text, width)
-    if not r.word_features and r.x_scale >= 1.0:
-        return r
+    The font's shrinking features (shr1, shr2, shrr) are never used, not even
+    tried: shaped inside a full line they push neighbouring words into each other
+    and squash letters within the word (the collisions first seen on page 18)."""
     line = J.analyze_line(text)
     sp = J.width(font, " ")
-    nat = r.natural_width
+    n_aya = sum(1 for t in line.spaces.values() if t == "aya")
+    # natural width exactly as justify_line measures it (word by word, wider spaces at ayah numbers)
+    nat = (sum(J.width(font, w.text) for w in line.words)
+           + sp * (len(line.spaces) - n_aya) + sp * J.AYA_SPACE * n_aya)
+    if width > nat:  # stretch: letter elongation and spaces only
+        r = J.justify_line(font, text, width)
+        used = {t for f in list(r.features.values()) + list(r.word_features.values()) for t in f}
+        assert not used & SHRINK_TAGS, f"font shrink feature used: {used & SHRINK_TAGS}"
+        return r
+    # compress: never through the font's shrink features; spaces first, then a horizontal scale
     n_simple = sum(1 for t in line.spaces.values() if t == "simple")
     simple, cur = sp, nat
     if n_simple:
@@ -906,6 +951,8 @@ def apply_art(path, records, style):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--unit", choices=("juz", "hizb"), default="juz",
+                    help="fixed page count per juz (20, juz 30 on 24; the default) or per hizb (10, the last hizb 14)")
     ap.add_argument("--shrink", type=float, default=0.25, help="largest allowed compression of a line (default 0.25)")
     ap.add_argument("--out", default=os.path.join(WORK, "quran-nazm.pdf"))
     ap.add_argument("--art", default="hafs-adi", choices=sorted(ART_STYLES) + ["none"],
@@ -914,7 +961,7 @@ def main():
     args = ap.parse_args()
     t0 = time.time()
     txt = Text()
-    book, W, longest = build_layout(txt, args.shrink)
+    book, W, longest = build_layout(txt, args.shrink, args.unit)
     print(f"layout: {len(book)} pages, line width {W:.0f} units "
           f"(type {15437.6 / W * 100:.0f}% of Madina 1441H), {time.time() - t0:.0f}s")
     lo, hi = 1, len(book)
@@ -945,12 +992,13 @@ def main():
                squeeze_max=round(float(1 - xs.min()), 3), centred_lines=stats["centred"],
                every_page_ends_on_ayah=ends_ok, no_line_starts_with_marker=starts_ok,
                lowest_surah_title_row=max(i + 1 for p in book for i, row in enumerate(p["rows"]) if row[0] == "title"),
-               juz30_pages=sum(1 for p in book if p["hizb"] >= 59), hizb60_pages=sum(1 for p in book if p["hizb"] == 60),
+               unit=args.unit, juz30_pages=sum(1 for p in book if in_juz30(p)),
+               hizb60_pages=sum(1 for p in book if p["hizb"] == 60) if args.unit == "hizb" else None,
                short_suras_split=[sn for sn, w in split_short_suras(txt, book)
                                   if header_lines(sn) + lines_needed([x for a in range(1, len(txt.suras[sn - 1]["ayas"]) + 1)
                                                                       for _, x in txt.units(sn, a)], W, txt.sp) <= LINES],
                within_page_spread=round(float(np.median([np.std(np.log([W / r[2] for r in p["rows"] if r[0] == "text" and W / r[2] <= 1.8]))
-                                                         for p in book if p["hizb"] <= 58])), 3),
+                                                         for p in book if not in_juz30(p)])), 3),
                within_page_spread_madina_1441h=0.063,
                collisions_cleared_by_spacing=stats["cleared"],
                word_collisions=len(stats["collisions"]),

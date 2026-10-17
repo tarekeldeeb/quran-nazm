@@ -139,10 +139,40 @@ The two-stage method is already within a few percent of the optimum for a given 
 
 What remains is structural. Of the spread of log stretch over all lines (0.108), the hizb-to-hizb part is 0.085, between pages of a hizb 0.050 and within a page 0.044 (they add in squares). The first is the price of exactly ten pages per hizb: if each hizb could take 8 to 12 pages (still 580 pages, each hizb starting a page), it would fall to 0.031.
 
-## 9. Open points
+## 9. Madina vs 10 pages per hizb vs 20 pages per juz
+
+Section 8 showed that most of the hizb layout's remaining variance comes from forcing every hizb to exactly 10 pages. Without that rule, fixing only the juz to 20 pages (as the print does) and letting hizbs start anywhere, the same method gives a different picture. `scripts/69_unit_comparison.py` (`data/unit_comparison.json`) measures all three the same way, on juz 1–29 (juz 30 is an exception in each): stretch = line width / natural width shaped in DigitalKhatt; the print's full lines from `data/m_1441H.json`; spreads are standard deviations of log stretch.
+
+| | Madina 1441H | Nazm, 10 pages per hizb | Nazm, 20 pages per juz | Nazm, 20 per juz at 93% type |
+|---|---|---|---|---|
+| Type size vs the print | 100% | 93% | 100% | 93% |
+| Median stretch | 1.00× | 1.07× | 0.99× | 1.07× |
+| 5th–95th percentile | 0.85–1.19× | 0.90–1.28× | 0.87–1.13× | 0.94–1.22× |
+| Lines more than 10% off | 35% | 48% | 24% | 38% |
+| **Spread of all lines** | 0.104 | 0.108 | **0.081** | 0.081 |
+| between juz | 0.047 | 0.049 | 0.049 | 0.049 |
+| between pages of a juz | 0.066 | 0.086 | **0.048** | 0.048 |
+| within a page | 0.065 | 0.044 | 0.045 | 0.045 |
+| Line spread inside a page (median) | 0.062 | 0.039 | 0.040 | 0.040 |
+| Neighbouring pages (median difference) | 0.051 | 0.044 | 0.040 | 0.040 |
+| Sparsest / densest page | 1.31× / 0.81× | 1.43× / 0.78× | 1.23× / 0.82× | 1.32× / 0.88× |
+| Hizbs / juz starting a page | n/a / 26 of 29 | 60 / 30 | 35 / 30 | 35 / 30 |
+
+From full renders (whole book):
+
+| | 10 per hizb, 25% limit | 20 per juz, 25% limit | 20 per juz, 19% limit |
+|---|---|---|---|
+| Type size | 93% | 100% | 93% |
+| Lines squeezed horizontally | 21% | 45% | 14% |
+| Worst squeeze | 24% | 24% | 18% |
+| Short surahs split | 88, 92, 98, 100 | 88, 90, 93 | 86, 92, 98, 100 |
+
+The 10-page hizb rule had made the pages of a juz *more* uneven than the print (0.086 against 0.066): every hizb had to fill exactly 10 pages whatever its length. Fixing only the juz removes that: the spread of all lines falls 22% below the print (0.081 against 0.104) while the evenness inside a page keeps its 35–38% gain, and type can match the print's size. The cost is that hizbs no longer start at the top of a page (35 of 60 do, against 60), and at 100% type nearly half the lines are compressed and squeezed horizontally; at 93% type (`--shrink 0.19`) every measure is better than the hizb layout's. The renderer now uses 20 pages per juz by default (`--unit juz`), with the 25% limit; the font's shrinking features are never used.
+
+## 10. Open points
 
 - **Horizontal squeeze.** At 25%, about one line in five is scaled horizontally, visibly on dense pages such as page 541 (Al-Mujadila 1–7). Two remedies: a lower limit (squeeze is rare at 20%), or compression forms in DigitalKhatt that are safe inside a full line. The font has no narrow ligatures today: of its features only `shrr` and `shr1` narrow words (`shr2` changes nothing; `jalt`, `ss01` and the `cv` variants only widen). `shrr` would save 4.8% of the text width, but it works by sliding letters into each other: only 14% of the words it narrows keep every letter clear of the others, worth 0.24% (mostly ٱللَّه). Some of its overlaps are real calligraphic tucks (the alef of ٱل- into the lam) and others collisions (إذا, أما), which only a review of the forms, or new narrow forms in the font, can separate.
-- **Hizb 55** (from Al-Mujadila) is the densest hizb and dominates the compressed end; its page 541 sets the type size for the whole book (section 8). A cap on page density gives 95% type; making it an exception would relieve it further.
+- **Hizb 55** (from Al-Mujadila) is the densest hizb and dominates the compressed end; in the hizb layout its page 541 set the type size for the whole book (section 8).
 - **Title at line 11 before a page break.** The rule allows a surah to open on line 11 with three lines before the page turns (page 591, Al-Ghashiya). A stricter limit for surahs that continue onto the next page (line 10 or higher) would remove these.
 - **Juz 30 splits.** Four short surahs span two pages to keep every page evenly filled; ornamental continuation marks or a different header size could let more stay whole.
 - **Scan resolution.** Pen-weight figures would sharpen with a 300 ppi scan.

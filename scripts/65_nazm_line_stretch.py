@@ -14,7 +14,7 @@ from paths import DATA
 import render_mushaf as R
 
 txt = R.Text()
-book, W, _ = R.build_layout(txt, 0.25)
+book, W, _ = R.build_layout(txt, 0.25, "hizb")
 pages = [dict(page=i, hizb=p["hizb"], stretch=[round(W / r[2], 4) for r in p["rows"] if r[0] == "text"])
          for i, p in enumerate(book, 1)]
 json.dump(dict(line_width=W, pages=pages), open(os.path.join(DATA, "nazm_line_stretch.json"), "w"))

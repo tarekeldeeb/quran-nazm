@@ -64,7 +64,7 @@ def short_splits(txt, book, W):
 
 def build(txt, rule, exempt=False):
     R.TITLE_RULE, R.TITLE_RULE_EXEMPT_WHOLE = rule, exempt
-    book, W, _ = R.build_layout(txt, SHRINK)
+    book, W, _ = R.build_layout(txt, SHRINK, "hizb")
     return book, W
 
 
