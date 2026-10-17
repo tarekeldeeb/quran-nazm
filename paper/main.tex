@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.3.1}% bump on each revision
+\newcommand{\paperversion}{v0.3.2}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -60,7 +60,7 @@ Printed Qurans are organised in reading units (the juz, the hizb and its quarter
 \section{Introduction}
 The Madina Mushaf has shaped how the Quran looks to readers for four decades. Its fifteen-line pages have become a shared map: readers memorise by page, teachers assign by page, and a juz, the thirtieth part of the Quran, begins at the top of a known page. The text was written by hand by Uthman Taha and the pages were then composed manually~\cite{kfgqpc}. The hand is the model that digital efforts try to reproduce; the composition is something else. Lines were filled by what fitted, stretched or compressed by eye, and in places the written words were scaled to close a line.
 
-Behind these local decisions sits a global fact that every Mushaf faces: the traditional reading units are unequal. A rub' (quarter of a hizb) may hold more than twice the text of another, and even whole juz differ by 16\%. A Mushaf that wants a unit to begin at a fixed place must stretch some text and compress other text. The question is not whether to absorb this variance, but at which unit and by what means.
+Behind these local decisions sits a global fact that every Mushaf faces: the traditional reading units are unequal. Their division is old. It is traditionally attributed to the time of al-Hajjaj ibn Yusuf al-Thaqafi, when committees of reciters and scholars, among them Abu Bakr ibn `Ayyash, were charged with fixing the text of the Mushaf and dividing it into parts equal in their number of words. The boundaries in use today, however, also follow ayah ends and the sense of the text, and the parts they define are far from equal in length: a rub' (quarter of a hizb) may hold more than twice the text of another, and even whole juz differ by 16\%. A Mushaf that wants a unit to begin at a fixed place must stretch some text and compress other text. The question is not whether to absorb this variance, but at which unit and by what means.
 
 Digital Arabic typography has meanwhile reached the point where the Madina hand can be set by rule. DigitalKhatt~\cite{digitalkhatt,anane2021} models it as an OpenType font whose letters can elongate (kashida and alternate forms), and HarfBuzz~\cite{harfbuzz} shapes it on any platform. Our own renderer, quran-madina-html~\cite{qmh}, reproduces the existing Madina layouts line for line. This paper asks what a typesetter should do when it is free to choose the layout. Our contributions are:
 \begin{enumerate}
