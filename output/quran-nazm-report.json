@@ -5,26 +5,26 @@
  "line_width_units": 16601,
  "type_size_vs_madina": 0.93,
  "stretch_median": 1.072,
- "stretch_p5": 0.898,
+ "stretch_p5": 0.896,
  "stretch_p95": 1.281,
  "stretch_max": 1.79,
- "lines_compressed": 0.263,
- "lines_squeezed": 0.211,
+ "lines_compressed": 0.262,
+ "lines_squeezed": 0.21,
  "squeeze_max": 0.237,
- "centred_lines": 7,
+ "centred_lines": 9,
  "every_page_ends_on_ayah": true,
  "no_line_starts_with_marker": true,
+ "lowest_surah_title_row": 11,
  "juz30_pages": 24,
  "short_suras_split": [
   86,
   92,
-  96,
   98,
-  111
+  100
  ],
  "within_page_spread": 0.039,
  "within_page_spread_madina_1441h": 0.063,
- "collisions_cleared_by_spacing": 10,
+ "collisions_cleared_by_spacing": 11,
  "word_collisions": 0,
  "word_collision_examples": []
 }

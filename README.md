@@ -22,6 +22,7 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the pap
 - **Every page ends with an ayah number**, and no line starts with an ayah marker.
 - **Each hizb is set as one unstretched line**, cut into 10 equal pages at ayah ends, then each page into 15 equal lines at word boundaries. Both sets of cuts are chosen jointly by dynamic programming.
 - **Every surah starts on a new line** under its header, and short surahs are kept whole on one page wherever page balance allows.
+- **No surah title below line 11**, so a surah never begins with a line or two at the foot of a page before a page break.
 - **One line width for the whole book.** Lines stretch with DigitalKhatt's letter elongation, and compress by at most 25%.
 - **No word may touch its neighbour.** Every line is checked for ink contact, and touching words get a little more space.
 
@@ -57,7 +58,7 @@ python scripts/render_mushaf.py
 |---|---|
 | `scripts/render_mushaf.py` | the typesetter: layout and PDF writer |
 | `scripts/00_prepare.py` | extracts fonts (and scan pages, for the analysis) |
-| `scripts/10_*` … `scripts/66_*` | the research scripts behind each finding and the paper's ablations, numbered by stage |
+| `scripts/10_*` … `scripts/67_*` | the research scripts behind each finding, the paper's ablations and the surah-title rule study, numbered by stage |
 | `docs/findings.md` | measurements, comparisons and decisions |
 | `docs/RENDERING.md` | how to generate the PDF, step by step |
 | `docs/madina-variance-evidence.html` | evidence document: line density, pen weight, ayah markers in the Madina print |
