@@ -1047,22 +1047,13 @@ def add_cover(path, unit, style):
         art = ART_STYLES[style]
         base = os.path.join(ROOT, "assets", "art", style)
         frame = pymupdf.open("pdf", pymupdf.open(os.path.join(base, art["frame"])).convert_to_pdf())
-        header = pymupdf.open("pdf", pymupdf.open(os.path.join(base, art["header"])).convert_to_pdf())
         m = 9 * MM
         cover.show_pdf_page(pymupdf.Rect(m, m, PAGE_W - m, PAGE_H - m), frame, 0, keep_proportion=False)
-        hw = PAGE_W - 2 * m - 22 * MM
-        hh = hw * art["header_box"][1] / art["header_box"][0]
-        hrect = pymupdf.Rect((PAGE_W - hw) / 2, 30 * MM, (PAGE_W + hw) / 2, 30 * MM + hh)
-        cover.show_pdf_page(hrect, header, 0)
-        title_box = pymupdf.Rect(hrect.x0, hrect.y0 - 1.2 * MM, hrect.x1, hrect.y1)
-    else:
-        title_box = pymupdf.Rect(20 * MM, 28 * MM, PAGE_W - 20 * MM, 46 * MM)
     arch = pymupdf.Archive(WORK)
-    cover.insert_htmlbox(title_box, '<div class="ar" style="font-size:26pt">نَظْم</div>', css=COVER_CSS, archive=arch)
     pages = "every juz on exactly twenty pages" if unit == "juz" else "every hizb on exactly ten pages"
     pages_ar = "كلُّ جزءٍ في عشرين صفحة" if unit == "juz" else "كلُّ حزبٍ في عشر صفحات"
     body = f"""
-<div class="ar">مصحف المدينة برواية حفص عن عاصم<br>مُنَضَّدٌ آليًّا بقواعد صريحة</div>
+<div class="ar">مصحف نظم برواية حفص عن عاصم<br>مُنَضَّدٌ آليًّا بقواعد صريحة</div>
 <div class="ar2" style="margin-top:6pt">{pages_ar}، وكلُّ صفحةٍ تنتهي بآية،<br>
 وتتوازن الأسطر بخطّ رقمي واحد لا يتغيّر قلمه</div>
 <div class="title" style="margin-top:16pt">Quran-Nazm</div>
@@ -1073,7 +1064,7 @@ text widths, and letters elongated, never shrunk, in the DigitalKhatt reproducti
 <div class="small" style="margin-top:4pt">Font: DigitalKhatt (Amine Anane), via quran-madina-html.
 Frame and surah headers: quran-assets by quran.ws (CC BY-NC-SA 4.0). Running heads: Amiri Quran.</div>
 """
-    cover.insert_htmlbox(pymupdf.Rect(20 * MM, 72 * MM, PAGE_W - 20 * MM, PAGE_H - 22 * MM), body,
+    cover.insert_htmlbox(pymupdf.Rect(20 * MM, 62 * MM, PAGE_W - 20 * MM, PAGE_H - 22 * MM), body,
                          css=COVER_CSS, archive=arch)
     doc.set_page_labels([dict(startpage=0, prefix="cover", style="", firstpagenum=1),
                          dict(startpage=1, style="D", firstpagenum=1)])
