@@ -1,0 +1,77 @@
+{
+ "current": {
+  "type_size": 0.9299058805812815,
+  "stretch_median": 1.0734723569350146,
+  "stretch_p95": 1.2809408832870441,
+  "within_page_spread": 0.0390470961805561,
+  "sparsest_page": 1.4339568439667425,
+  "densest_page": 0.7821374719466472,
+  "objective": 143.9045504237568,
+  "sd_log_stretch": 0.10797639033914426,
+  "sd_between_hizbs": 0.08485424255939616,
+  "sd_between_pages": 0.050411075560704066,
+  "sd_within_pages": 0.043787919009190115
+ },
+ "density_cap": {
+  "type_size": 0.9496409073433295,
+  "stretch_median": 1.0511639185257031,
+  "stretch_p95": 1.2543402777777777,
+  "within_page_spread": 0.0390400490742044,
+  "sparsest_page": 1.4041569728023107,
+  "densest_page": 0.7766770196587173,
+  "objective": 122.64172484156802,
+  "sd_log_stretch": 0.10825053068018992,
+  "sd_between_hizbs": 0.08476474938318827,
+  "sd_between_pages": 0.050594939836038466,
+  "sd_within_pages": 0.044421466854840254,
+  "cap_vs_densest_page": 0.9907714843750001
+ },
+ "milp_check": {
+  "2": {
+   "dynamic_programme": 1.7184475278797613,
+   "highs_milp": 1.718447527879761
+  },
+  "55": {
+   "dynamic_programme": 2.356240040422935,
+   "highs_milp": 2.356240040422935
+  }
+ },
+ "joint_same_w": {
+  "type_size": 0.9299058805812815,
+  "stretch_median": 1.0736459186650844,
+  "stretch_p95": 1.2791495084060716,
+  "within_page_spread": 0.03859479466864687,
+  "sparsest_page": 1.4339568439667425,
+  "densest_page": 0.7821374719466472,
+  "objective": 140.37747645406355,
+  "sd_log_stretch": 0.10716018849143996,
+  "sd_between_hizbs": 0.0850294258613819,
+  "sd_between_pages": 0.05074060638500431,
+  "sd_within_pages": 0.04097186350273515
+ },
+ "joint_best_w": {
+  "type_size": 0.9515725887229748,
+  "stretch_median": 1.0492675365886757,
+  "stretch_p95": 1.250024080249909,
+  "within_page_spread": 0.038594794668646855,
+  "sparsest_page": 1.401306550343104,
+  "densest_page": 0.7751290670457057,
+  "objective": 117.50034137753977,
+  "sd_log_stretch": 0.10729517788795614,
+  "sd_between_hizbs": 0.08499548617920008,
+  "sd_between_pages": 0.050926202062199985,
+  "sd_within_pages": 0.04116484508278319,
+  "width_vs_current": 0.977304755078125
+ },
+ "flexible_pages_per_hizb": {
+  "fixed_10": 0.08457771057601009,
+  "pages_8_to_12": 0.031384303299704076,
+  "page_counts": {
+   "8": 1,
+   "9": 17,
+   "10": 24,
+   "11": 13,
+   "12": 3
+  }
+ }
+}

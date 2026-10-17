@@ -18,7 +18,7 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the pap
 
 ## The rules
 
-- **Every hizb fills exactly 10 pages** of 15 lines; juz 30, the one exception, fills 24.
+- **Every hizb fills exactly 10 pages** of 15 lines; the last hizb (Al-A'la to An-Nas, 28 surahs), the one exception, fills 14.
 - **Every page ends with an ayah number**, and no line starts with an ayah marker.
 - **Each hizb is set as one unstretched line**, cut into 10 equal pages at ayah ends, then each page into 15 equal lines at word boundaries. Both sets of cuts are chosen jointly by dynamic programming.
 - **Every surah starts on a new line** under its header, and short surahs are kept whole on one page wherever page balance allows.
@@ -58,7 +58,8 @@ python scripts/render_mushaf.py
 |---|---|
 | `scripts/render_mushaf.py` | the typesetter: layout and PDF writer |
 | `scripts/00_prepare.py` | extracts fonts (and scan pages, for the analysis) |
-| `scripts/10_*` … `scripts/67_*` | the research scripts behind each finding, the paper's ablations and the surah-title rule study, numbered by stage |
+| `scripts/10_*` … `scripts/68_*` | the research scripts behind each finding, the paper's ablations, the surah-title rule and the exact-optimum study, numbered by stage |
+| `scripts/joint_layout.py` | exact joint page and line breaking (nested dynamic programming, checked with HiGHS) |
 | `docs/findings.md` | measurements, comparisons and decisions |
 | `docs/RENDERING.md` | how to generate the PDF, step by step |
 | `docs/madina-variance-evidence.html` | evidence document: line density, pen weight, ayah markers in the Madina print |

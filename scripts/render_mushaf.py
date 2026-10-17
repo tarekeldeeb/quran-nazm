@@ -244,7 +244,7 @@ def hizb_ranges():
 SMALL_SURA_PENALTY = 0.6  # cost of cutting a page inside a surah that fits on one page
 
 
-def fixed_pages(txt, ayahs, pages, title_rule=True):
+def fixed_pages(txt, ayahs, pages, title_rule=True, max_density=None):
     """Cut a run of ayahs into exactly `pages` pages at ayah ends, all cuts chosen
     together so every page holds the same share of text (a surah header counts as
     the lines it uses). Cutting inside a surah short enough to fit on one page is
@@ -264,6 +264,11 @@ def fixed_pages(txt, ayahs, pages, title_rule=True):
         if whole and v[i1 + 1] - v[i0] <= target:
             pen[i0 + 1:i1 + 1] = SMALL_SURA_PENALTY * target ** 2
     n, P, INF = len(ayahs), pages, 1e30
+    cw = np.concatenate([[0], np.cumsum(w)])
+    ch = np.concatenate([[0], np.cumsum(hdr)])
+
+    def too_dense(j, i):  # natural text per available line above max_density
+        return max_density is not None and (cw[i] - cw[j]) > max_density * (LINES - (ch[i] - ch[j]))
     cnt = [len(txt.units(s, a)) for s, a in ayahs]
     starts = [i for i, (s, a) in enumerate(ayahs) if a == 1]
 
@@ -283,7 +288,7 @@ def fixed_pages(txt, ayahs, pages, title_rule=True):
     for k in range(1, P + 1):
         for i in range(k, n - (P - k) + 1):
             for j in range(max(k - 1, i - 200), i):
-                if best[k - 1][j] >= INF or low_title(j, i):
+                if best[k - 1][j] >= INF or too_dense(j, i) or low_title(j, i):
                     continue
                 c = best[k - 1][j] + (v[i] - v[j] - target) ** 2 + (pen[i] if i < n else 0)
                 if c < best[k][i]:
@@ -306,14 +311,16 @@ def lines_needed(ws, width, sp):
     return n
 
 
-JUZ30_PAGES = 24
+# Juz 30: hizb 59 keeps the 10-page rule, hizb 60 (Al-A'la to An-Nas, 28 surahs) is the one exception.
+# Both are cut by the lines each page really needs (see juz30_pages), since nearly every page starts a surah.
+JUZ30_PAGES = {59: PAGES_PER_HIZB, 60: 14}
 MIN_SPLIT_AYAHS = 2      # juz 30: a split surah keeps at least this many ayahs on each page
-JUZ30_MAX_STRETCH = 1.35 # juz 30: no page may be sparser than this average stretch (the last page excepted under the title rule)
+JUZ30_MAX_STRETCH = 1.35 # juz 30: no page may be sparser than this average stretch (the book's last page excepted under the title rule)
 SPLIT_SHORT_SURA = 25.0  # juz 30: cost of splitting a surah that fits on one page (vs. ~0.01 for a typical page)
 
 
-def juz30_pages(txt, ayahs, pages, W, shrink, max_stretch=None, title_rule=True):
-    """Juz 30 on exactly `pages` pages. Its many short surahs each start on a new
+def juz30_pages(txt, ayahs, pages, W, shrink, max_stretch=None, title_rule=True, last_exempt=True):
+    """A hizb of juz 30 on exactly `pages` pages. Its many short surahs each start on a new
     line, so a page is scored by the lines it really needs at width W: every
     surah segment is cut separately, and the page's average stretch should be
     close to 1. A page must fit within the shrink limit; splitting a surah that
@@ -347,7 +354,7 @@ def juz30_pages(txt, ayahs, pages, W, shrink, max_stretch=None, title_rule=True)
         widths = [sum(ws) + txt.sp * len(ws) for _, ws in segs]
         text = sum(widths)
         stretch = avail * W / text
-        if max_stretch and stretch > max_stretch and (i < n or not title_rule):  # the rule forces 1.50 on the last page
+        if max_stretch and stretch > max_stretch and (i < n or not title_rule or not last_exempt):  # the rule forces 1.50 on the book's last page
             return "sparse"  # too little text: the page would look empty
         if not title_rule:
             return math.log(stretch) ** 2
@@ -407,13 +414,13 @@ def build_layout(txt, shrink):
             book.append(dict(hizb=h + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
-    # Juz 30, the exception: both hizbs together on a fixed number of pages
-    a0, a1 = ranges[58][0], ranges[59][1]
-    hz60 = ranges[59][0]
-    for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES, W, shrink, JUZ30_MAX_STRETCH, TITLE_RULE):
-        idx = txt.flat.index(pa[0]) + 1
-        book.append(dict(hizb=59 if idx < hz60 else 60, ayahs=pa,
-                         rows=page_rows(txt, pa, fit_width=W / (1 - shrink) if TITLE_RULE else None)))
+    # Juz 30: hizb 59 on 10 pages like every hizb, hizb 60 the exception; pages scored by lines needed
+    for h in (59, 60):
+        a0, a1 = ranges[h - 1]
+        for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES[h], W, shrink, JUZ30_MAX_STRETCH,
+                              TITLE_RULE, last_exempt=(h == 60)):
+            book.append(dict(hizb=h, ayahs=pa,
+                             rows=page_rows(txt, pa, fit_width=W / (1 - shrink) if TITLE_RULE else None)))
     return book, W, longest
 
 
@@ -938,7 +945,7 @@ def main():
                squeeze_max=round(float(1 - xs.min()), 3), centred_lines=stats["centred"],
                every_page_ends_on_ayah=ends_ok, no_line_starts_with_marker=starts_ok,
                lowest_surah_title_row=max(i + 1 for p in book for i, row in enumerate(p["rows"]) if row[0] == "title"),
-               juz30_pages=sum(1 for p in book if p["hizb"] >= 59),
+               juz30_pages=sum(1 for p in book if p["hizb"] >= 59), hizb60_pages=sum(1 for p in book if p["hizb"] == 60),
                short_suras_split=[sn for sn, w in split_short_suras(txt, book)
                                   if header_lines(sn) + lines_needed([x for a in range(1, len(txt.suras[sn - 1]["ayas"]) + 1)
                                                                       for _, x in txt.units(sn, a)], W, txt.sp) <= LINES],
