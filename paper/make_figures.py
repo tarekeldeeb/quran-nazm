@@ -142,12 +142,13 @@ ax.tick_params(axis="y", length=0)
 save(fig, "fig_units.pdf")
 
 # 4. Line stretch: Madina 1441H vs Nazm (all lines, and spread inside each page)
-mad_pages = {}
+mad_pages = {}  # juz 1-29 only (juz 30 starts on page 582 of the print), as in the unit comparison
 for o in m:
-    mad_pages.setdefault(o["p"], []).append(1 / o["ratio"])
+    if o["p"] < 582:
+        mad_pages.setdefault(o["p"], []).append(1 / o["ratio"])
 nz = data("nazm_line_stretch.json")["pages"]
-nz_lines = np.array([s for p in nz for s in p["stretch"] if s <= 1.8])
-mad_lines = 1 / ratio
+nz_lines = np.array([s for p in nz if p["juz"] <= 29 for s in p["stretch"] if s <= 1.8])
+mad_lines = np.array([v for vs in mad_pages.values() for v in vs])
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(W1, 1.7))
 bins = np.arange(0.6, 1.8, 0.03)
 a1.hist(mad_lines, bins=bins, color=CORAL, alpha=0.55, label="Madina 1441H", density=True)
@@ -156,7 +157,7 @@ a1.set_xlabel("stretch applied to a line")
 a1.set_yticks([])
 a1.set_title("all lines", loc="left")
 sd_m = [np.std(np.log(v)) for v in mad_pages.values() if len(v) >= 10]
-sd_n = [np.std(np.log([s for s in p["stretch"] if s <= 1.8])) for p in nz if p["hizb"] <= 58]
+sd_n = [np.std(np.log([s for s in p["stretch"] if s <= 1.8])) for p in nz if p["juz"] <= 29]
 bins = np.arange(0, 0.2, 0.006)
 a2.hist(sd_m, bins=bins, color=CORAL, alpha=0.55, density=True)
 a2.hist(sd_n, bins=bins, color=GREEN, alpha=0.65, density=True)
@@ -171,22 +172,42 @@ fig.legend(h, l, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.0))
 save(fig, "fig_stretch.pdf")
 print(f"medians: Madina {np.median(sd_m):.3f}, Nazm {np.median(sd_n):.3f}")
 
-# 4b. Mean stretch of each hizb in the final layout (the variance left between hizbs)
-ab = data("ablations.json")
-ph = np.array(ab["per_hizb_mean_stretch"])
-fig, ax = plt.subplots(figsize=(W1, 1.55))
-cols = [CORAL if v == ph.max() or v == ph.min() else GREEN for v in ph]
-ax.bar(np.arange(1, len(ph) + 1), ph, color=cols, width=0.75)
+# 4b. Mean stretch of each juz in the final layout (the variance left between juz)
+jd = data("juz_design.json")
+pj = np.array(jd["per_juz_mean_stretch"])
+fig, ax = plt.subplots(figsize=(W1, 1.45))
+cols = [CORAL if v == pj.max() or v == pj.min() else GREEN for v in pj]
+ax.bar(np.arange(1, len(pj) + 1), pj, color=cols, width=0.72)
 ax.axhline(1.0, color=INK, lw=0.6, ls=(0, (3, 2)))
-ax.set_ylim(0.8, ph.max() + 0.1)
-hmax, hmin = int(np.argmax(ph)) + 1, int(np.argmin(ph)) + 1
-ax.text(hmax, ph[hmax - 1] + 0.015, f"hizb {hmax}", ha="center", fontsize=6.5, color=CORAL)
-ax.annotate(f"hizb {hmin}", xy=(hmin, ph[hmin - 1]), xytext=(hmin - 3, ph.max() + 0.04), ha="center",
-            fontsize=6.5, color=CORAL, arrowprops=dict(arrowstyle="-", color=CORAL, lw=0.5))
-ax.set_xlabel("hizb")
+ax.set_ylim(0.9, pj.max() + 0.06)
+jmax, jmin = int(np.argmax(pj)) + 1, int(np.argmin(pj)) + 1
+for jj in (jmax, jmin):
+    ax.text(jj + (0.35 if jj == len(pj) else 0), pj[jj - 1] + 0.008, f"juz {jj}", ha="center", fontsize=6, color=CORAL)
+ax.set_xlim(0.2, len(pj) + 1.2)
+ax.set_xlabel("juz")
 ax.set_ylabel("mean stretch")
-ax.set_xticks([1, 10, 20, 30, 40, 50, 58])
-save(fig, "fig_hizb_stretch.pdf")
+ax.set_xticks([1, 5, 10, 15, 20, 25, 29])
+save(fig, "fig_juz_stretch.pdf")
+
+# 4d. Where the variance sits: Madina vs 10 pages per hizb vs 20 pages per juz
+uc = data("unit_comparison.json")
+layouts = [("madina_1441h", "Madina 1441H", CORAL), ("nazm_hizb", "Nazm, 10 pages/hizb", GREY),
+           ("nazm_juz", "Nazm, 20 pages/juz", GREEN)]
+parts = [("sd_log_stretch", "all lines"), ("sd_between_juz", "between\njuz"),
+         ("sd_between_pages_in_juz", "between pages\nof a juz"), ("sd_within_page", "within\na page")]
+fig, ax = plt.subplots(figsize=(W1, 1.75))
+x = np.arange(len(parts))
+for k, (key, lab, col) in enumerate(layouts):
+    v = [uc[key][q] for q, _ in parts]
+    ax.bar(x + (k - 1) * 0.26, v, width=0.25, color=col, label=lab)
+    for xi, vi in zip(x + (k - 1) * 0.26, v):
+        ax.text(xi, vi + 0.002, f"{vi:.3f}".lstrip("0"), ha="center", fontsize=5.2, rotation=90, va="bottom")
+ax.set_xticks(x, [lab for _, lab in parts])
+ax.set_ylabel("s.d. of log stretch")
+ax.set_ylim(0, 0.125)
+ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=3, fontsize=6.2, frameon=False,
+          handlelength=1.0, columnspacing=0.9)
+save(fig, "fig_variance.pdf")
 
 # 4c. Average pen width of every all-text page of the scan (page-level drift)
 pages_sw = {}
@@ -206,9 +227,12 @@ save(fig, "fig_page_drift.pdf")
 
 # 5. Pages of the Nazm render as vector PDF pages, and crops of the Madina print
 src = pymupdf.open(os.path.join(ROOT, "output", "quran-nazm.pdf"))
-for n in (1, 2, 156, 412, 541, 590, 591):
+labels = src.get_page_labels()
+shift = 1 if labels and labels[0].get("prefix") == "cover" else 0  # the cover is PDF page 1
+fig_pages = data("paper_pages.json")  # Mushaf page numbers used by the paper, chosen from the layout
+for n in sorted(set(fig_pages.values())):
     one = pymupdf.open()
-    one.insert_pdf(src, from_page=n - 1, to_page=n - 1)
+    one.insert_pdf(src, from_page=n - 1 + shift, to_page=n - 1 + shift)
     one.save(os.path.join(OUT, f"nazm-p{n:03d}.pdf"))
     print("figure:", f"nazm-p{n:03d}.pdf")
 for name in ("01-1441h-page-156.png", "02-p-102-line-4.png", "03-p-102-line-5.png",

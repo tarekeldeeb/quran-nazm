@@ -1,0 +1,21 @@
+Quran-Nazm render: 604 pages, juz unit, compression limit 19%
+                                             this render     Madina 1441H
+  type size vs the Madina print                      93%             100%
+  median line stretch                              1.07x            1.00x
+  5th-95th percentile stretch                 0.94-1.23x       0.85-1.19x
+  lines more than 10% off                            39%              35%
+  spread of all lines (sd log stretch)             0.081            0.104
+    between juz                                    0.049            0.047
+    between pages of a juz                         0.048            0.066
+    within a page                                  0.044            0.065
+  line spread inside a page (median)                0.04            0.062
+  lines compressed                                   20%                 
+  lines squeezed horizontally              14% (max 18%)             none
+  lines centred (over 1.8x)                            5                 
+  juz / hizbs starting a page                    30 / 34                 
+  surah titles below line 11                           0                5
+  short surahs split                     86, 92, 98, 100                 
+  densest page:  page 121 (5:82-5:89), 0.88x
+  sparsest page: page 45 (2:270-2:274), 1.32x
+  checks: every page ends on an ayah yes; no line starts with a marker yes; words touching 0
+  (spreads measured outside juz 30; the Madina column is the print measured the same way, data/unit_comparison.json)

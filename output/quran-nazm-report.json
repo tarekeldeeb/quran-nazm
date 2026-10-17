@@ -1,17 +1,17 @@
 {
  "pages": 604,
  "rendered": "1-604",
- "shrink_limit": 0.25,
- "line_width_units": 15404,
- "type_size_vs_madina": 1.002,
- "stretch_median": 0.991,
- "stretch_p5": 0.869,
- "stretch_p95": 1.138,
- "stretch_max": 1.705,
- "lines_compressed": 0.547,
- "lines_squeezed": 0.455,
- "squeeze_max": 0.243,
- "centred_lines": 3,
+ "shrink_limit": 0.19,
+ "line_width_units": 16636,
+ "type_size_vs_madina": 0.928,
+ "stretch_median": 1.07,
+ "stretch_p5": 0.939,
+ "stretch_p95": 1.226,
+ "stretch_max": 1.794,
+ "lines_compressed": 0.2,
+ "lines_squeezed": 0.144,
+ "squeeze_max": 0.183,
+ "centred_lines": 5,
  "every_page_ends_on_ayah": true,
  "no_line_starts_with_marker": true,
  "lowest_surah_title_row": 11,
@@ -19,13 +19,35 @@
  "juz30_pages": 24,
  "hizb60_pages": null,
  "short_suras_split": [
-  88,
-  90,
-  93
+  86,
+  92,
+  98,
+  100
  ],
  "within_page_spread": 0.04,
  "within_page_spread_madina_1441h": 0.063,
- "collisions_cleared_by_spacing": 12,
+ "collisions_cleared_by_spacing": 4,
  "word_collisions": 0,
- "word_collision_examples": []
+ "word_collision_examples": [],
+ "spread_all_lines": 0.081,
+ "spread_between_juz": 0.049,
+ "spread_between_pages_of_a_juz": 0.048,
+ "spread_within_a_page": 0.044,
+ "neighbour_pages_median_difference": 0.04,
+ "lines_off_10pct": 0.391,
+ "juz_mean_stretch_range": [
+  0.934,
+  1.164
+ ],
+ "densest_page": [
+  "page 121 (5:82-5:89)",
+  0.882
+ ],
+ "sparsest_page": [
+  "page 45 (2:270-2:274)",
+  1.324
+ ],
+ "hizbs_starting_a_page": 34,
+ "juz_starting_a_page": 30,
+ "titles_below_line_11": 0
 }

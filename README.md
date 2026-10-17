@@ -12,7 +12,7 @@
 Every Mushaf starts from the same problem: the traditional reading units are unequal. The longest rub' holds 2.19× the text of the shortest, hizbs differ by 1.35× and even juz by 1.16×. Fixing a unit to a page count means absorbing that variance somewhere.
 
 - **The Madina Mushaf** fixes each juz to 20 pages, the most forgiving unit, and absorbs the rest by hand. Measured on the 1441H print, a full line holds anywhere from 4 to 15 words, a third of all lines are more than 10% too long or too short for the line width, and pen weight drifts from line to line and page to page.
-- **Quran-Nazm** fixes the same unit, every juz on exactly 20 pages, and absorbs the variance by rule instead of by hand. It keeps the hand and makes the setting even: at the print's own type size, lines on a page vary 35% less than in the print (0.040 vs 0.062), all line stretch varies 22% less (0.081 vs 0.104), every juz begins on a known page, and the pen is the same on every line. An earlier version fixed every hizb to 10 pages; it costs more variance than it removes (see [`docs/findings.md`](docs/findings.md), section 9), and remains available as `--unit hizb`.
+- **Quran-Nazm** fixes the same unit, every juz on exactly 20 pages, and absorbs the variance by rule instead of by hand. It keeps the hand and makes the setting even: lines on a page vary 35% less than in the print (0.040 vs 0.062), pages of a juz 27% less (0.048 vs 0.066), all line stretch 22% less (0.081 vs 0.104), every juz begins on a known page, and the pen is the same on every line. An earlier version fixed every hizb to 10 pages; it costs more variance than it removes (see [`docs/findings.md`](docs/findings.md), section 9), and remains available as `--unit hizb`.
 
 Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the paper in [`paper/`](paper/).
 
@@ -23,12 +23,12 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the pap
 - **Each juz is set as one unstretched line**, cut into 20 equal pages at ayah ends, then each page into 15 equal lines at word boundaries, balancing shaped text widths. Both sets of cuts are chosen by dynamic programming.
 - **Every surah starts on a new line** under its header, and short surahs are kept whole on one page wherever page balance allows.
 - **No surah title below line 11**, so a surah never begins with a line or two at the foot of a page before a page break.
-- **One line width for the whole book.** Lines stretch with DigitalKhatt's letter elongation, and compress by at most 25%, by tightening spaces and then a horizontal scale; the font's shrinking features are never used.
+- **One line width for the whole book.** Lines stretch with DigitalKhatt's letter elongation, and compress by at most 19%, by tightening spaces and then a horizontal scale; the font's shrinking features are never used.
 - **No word may touch its neighbour.** Every line is checked for ink contact, and touching words get a little more space.
 
 ## Output
 
-[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages (the same count as the print), 145 × 210 mm, vector text, one bookmark per surah, type at 100% of the Madina print (93% with `--shrink 0.19`, which squeezes fewer lines). Page frames and surah headers use the Hafs al-'Adi vector art from [quran-assets](https://quran.ws/blocks/quran-assets). [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
+[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages (the same count as the print), 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print. A static cover with a short description comes first, and the file opens two pages at a time, so a two-page viewer shows the cover on the left and page 1 on the right (`--no-cover` leaves it out). [`output/quran-nazm-summary.txt`](output/quran-nazm-summary.txt) is the short statistics summary every run prints, beside the print's values. Page frames and surah headers use the Hafs al-'Adi vector art from [quran-assets](https://quran.ws/blocks/quran-assets). [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
 
 To generate it yourself, see [`docs/RENDERING.md`](docs/RENDERING.md). In short:
 
@@ -58,7 +58,7 @@ python scripts/render_mushaf.py
 |---|---|
 | `scripts/render_mushaf.py` | the typesetter: layout and PDF writer |
 | `scripts/00_prepare.py` | extracts fonts (and scan pages, for the analysis) |
-| `scripts/10_*` … `scripts/68_*` | the research scripts behind each finding, the paper's ablations, the surah-title rule and the exact-optimum study, numbered by stage |
+| `scripts/10_*` … `scripts/70_*` | the research scripts behind each finding and every table of the paper, numbered by stage |
 | `scripts/joint_layout.py` | exact joint page and line breaking (nested dynamic programming, checked with HiGHS) |
 | `docs/findings.md` | measurements, comparisons and decisions |
 | `docs/RENDERING.md` | how to generate the PDF, step by step |

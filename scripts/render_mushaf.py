@@ -460,6 +460,80 @@ def in_juz30(p):
     return p.get("juz", 30 if p["hizb"] >= 59 else 0) == 30
 
 
+def layout_stats(txt, book, W):
+    """Evenness of the layout, measured on every page outside juz 30 (the exception):
+    stretch s = W / natural width of a line (lines over 1.8x are centred and left out).
+    The spread of log s is split, in squares, into between juz, between pages of a juz
+    and within a page; these do not depend on W."""
+    hz, jz = hizb_ranges(), juz_ranges()
+    body = []
+    for i, p in enumerate(book):
+        if in_juz30(p):
+            continue
+        s = [W / r[2] for r in p["rows"] if r[0] == "text"]
+        k = [x for x in s if x <= 1.8]
+        juz = p.get("juz") or (p["hizb"] + 1) // 2
+        body.append((i + 1, juz, p, np.log(k)))
+    ls = np.concatenate([b[3] for b in body])
+    jm = {j: np.concatenate([b[3] for b in body if b[1] == j]).mean() for j in {b[1] for b in body}}
+    pm = [b[3].mean() for b in body]
+    sq = lambda v: float(math.sqrt(v))
+    fill = [float(np.exp(b[3]).mean()) for b in body]
+    lo, hi = int(np.argmin(fill)), int(np.argmax(fill))
+    first = {txt.flat.index(p["ayahs"][0]) + 1 for p in book}
+    titles = [k + 1 for p in book for k, r in enumerate(p["rows"]) if r[0] == "title"]
+
+    def where(b):
+        (s0, a0), (s1, a1) = b[2]["ayahs"][0], b[2]["ayahs"][-1]
+        return f"page {b[0]} ({s0}:{a0}-{s1}:{a1})"
+    return dict(
+        spread_all_lines=round(float(ls.std()), 3),
+        spread_between_juz=round(sq(np.mean([(jm[b[1]] - ls.mean()) ** 2 for b in body for _ in b[3]])), 3),
+        spread_between_pages_of_a_juz=round(sq(np.mean([(m - jm[b[1]]) ** 2 for b, m in zip(body, pm) for _ in b[3]])), 3),
+        spread_within_a_page=round(sq(np.mean([(x - m) ** 2 for b, m in zip(body, pm) for x in b[3]])), 3),
+        neighbour_pages_median_difference=round(float(np.median(np.abs(np.diff(pm)))), 3),
+        lines_off_10pct=round(float((np.abs(ls) > math.log(1.1)).mean()), 3),
+        juz_mean_stretch_range=[round(float(np.exp(min(jm.values()))), 3), round(float(np.exp(max(jm.values()))), 3)],
+        densest_page=[where(body[lo]), round(fill[lo], 3)], sparsest_page=[where(body[hi]), round(fill[hi], 3)],
+        hizbs_starting_a_page=sum(1 for a0, _ in hz if a0 in first), juz_starting_a_page=sum(1 for a0, _ in jz if a0 in first),
+        titles_below_line_11=sum(1 for t in titles if t > TITLE_MAX_ROW))
+
+
+def summary_text(rep, madina):
+    """A short plain-text summary of a render, beside the Madina 1441H print."""
+    m = madina or {}
+    def row(label, v, ref=""):
+        return f"  {label:<38s}{str(v):>16s}   {str(ref):>14s}"
+    pct = lambda x: f"{x * 100:.0f}%"
+    part = "" if rep["rendered"] == f"1-{rep['pages']}" else f" (line statistics from rendered pages {rep['rendered']} only)"
+    out = [f"Quran-Nazm render: {rep['pages']} pages, {rep['unit']} unit, compression limit {pct(rep['shrink_limit'])}{part}",
+           row("", "this render", "Madina 1441H"),
+           row("type size vs the Madina print", pct(rep["type_size_vs_madina"]), "100%"),
+           row("median line stretch", f"{rep['stretch_median']:.2f}x", f"{m.get('stretch_median', 1.0):.2f}x" if m else ""),
+           row("5th-95th percentile stretch", f"{rep['stretch_p5']:.2f}-{rep['stretch_p95']:.2f}x",
+               f"{m['stretch_p5']:.2f}-{m['stretch_p95']:.2f}x" if m else ""),
+           row("lines more than 10% off", pct(rep["lines_off_10pct"]), pct(m["lines_off_10pct"]) if m else ""),
+           row("spread of all lines (sd log stretch)", rep["spread_all_lines"], f"{m['sd_log_stretch']:.3f}" if m else ""),
+           row("  between juz", rep["spread_between_juz"], f"{m['sd_between_juz']:.3f}" if m else ""),
+           row("  between pages of a juz", rep["spread_between_pages_of_a_juz"], f"{m['sd_between_pages_in_juz']:.3f}" if m else ""),
+           row("  within a page", rep["spread_within_a_page"], f"{m['sd_within_page']:.3f}" if m else ""),
+           row("line spread inside a page (median)", rep["within_page_spread"], f"{m['within_page_spread_median']:.3f}" if m else ""),
+           row("lines compressed", pct(rep["lines_compressed"])),
+           row("lines squeezed horizontally", pct(rep["lines_squeezed"]) + f" (max {pct(rep['squeeze_max'])})", "none"),
+           row("lines centred (over 1.8x)", rep["centred_lines"]),
+           row("juz / hizbs starting a page", f"{rep['juz_starting_a_page']} / {rep['hizbs_starting_a_page']}"),
+           row("surah titles below line 11", rep["titles_below_line_11"], "5"),
+           row("short surahs split", ", ".join(map(str, rep["short_suras_split"])) or "none"),
+           f"  densest page:  {rep['densest_page'][0]}, {rep['densest_page'][1]:.2f}x",
+           f"  sparsest page: {rep['sparsest_page'][0]}, {rep['sparsest_page'][1]:.2f}x",
+           f"  checks: every page ends on an ayah {'yes' if rep['every_page_ends_on_ayah'] else 'NO'}; "
+           f"no line starts with a marker {'yes' if rep['no_line_starts_with_marker'] else 'NO'}; "
+           f"words touching {rep['word_collisions']}",
+           "  (spreads measured outside juz 30; the Madina column is the print measured the same way,"
+           " data/unit_comparison.json)"]
+    return "\n".join(out)
+
+
 def split_short_suras(txt, book):
     """Surahs short enough for one page that still span two pages."""
     pages_of = {}
@@ -949,14 +1023,79 @@ def apply_art(path, records, style):
     os.replace(tmp, path)
 
 
+COVER_CSS = """
+@font-face { font-family: amiri; src: url(amiri.ttf); }
+body { font-family: amiri; color: #17361f; text-align: center; margin: 0; }
+.ar { direction: rtl; font-size: 15pt; line-height: 1.55; }
+.ar2 { direction: rtl; font-size: 11.5pt; line-height: 1.6; }
+.en { font-size: 9.6pt; line-height: 1.45; }
+.title { font-size: 21pt; letter-spacing: 0.5pt; }
+.small { font-size: 7.4pt; line-height: 1.4; color: #2f6b55; }
+"""
+
+
+def add_cover(path, unit, style):
+    """Put a static cover before page 1: the project in a few lines, Arabic and English.
+    The PDF opens two pages at a time with its first page on the left, so a two-page
+    viewer shows the cover on the left and page 1 on the right; page labels keep "1"
+    on the Mushaf's first page."""
+    import pymupdf
+    doc = pymupdf.open(path)
+    cover = doc.new_page(0, width=PAGE_W, height=PAGE_H)
+    box = pymupdf.Rect(0, 0, PAGE_W, PAGE_H)
+    if style != "none":
+        art = ART_STYLES[style]
+        base = os.path.join(ROOT, "assets", "art", style)
+        frame = pymupdf.open("pdf", pymupdf.open(os.path.join(base, art["frame"])).convert_to_pdf())
+        header = pymupdf.open("pdf", pymupdf.open(os.path.join(base, art["header"])).convert_to_pdf())
+        m = 9 * MM
+        cover.show_pdf_page(pymupdf.Rect(m, m, PAGE_W - m, PAGE_H - m), frame, 0, keep_proportion=False)
+        hw = PAGE_W - 2 * m - 22 * MM
+        hh = hw * art["header_box"][1] / art["header_box"][0]
+        hrect = pymupdf.Rect((PAGE_W - hw) / 2, 30 * MM, (PAGE_W + hw) / 2, 30 * MM + hh)
+        cover.show_pdf_page(hrect, header, 0)
+        title_box = pymupdf.Rect(hrect.x0, hrect.y0 - 1.2 * MM, hrect.x1, hrect.y1)
+    else:
+        title_box = pymupdf.Rect(20 * MM, 28 * MM, PAGE_W - 20 * MM, 46 * MM)
+    arch = pymupdf.Archive(WORK)
+    cover.insert_htmlbox(title_box, '<div class="ar" style="font-size:26pt">نَظْم</div>', css=COVER_CSS, archive=arch)
+    pages = "every juz on exactly twenty pages" if unit == "juz" else "every hizb on exactly ten pages"
+    pages_ar = "كلُّ جزءٍ في عشرين صفحة" if unit == "juz" else "كلُّ حزبٍ في عشر صفحات"
+    body = f"""
+<div class="ar">مصحف المدينة برواية حفص عن عاصم<br>مُنَضَّدٌ آليًّا بقواعد صريحة</div>
+<div class="ar2" style="margin-top:6pt">{pages_ar}، وكلُّ صفحةٍ تنتهي بآية،<br>
+وتتوازن الأسطر بخطّ رقمي واحد لا يتغيّر قلمه</div>
+<div class="title" style="margin-top:16pt">Quran-Nazm</div>
+<div class="en" style="margin-top:4pt">The Madina Mushaf (Hafs), typeset automatically by explicit rules:
+{pages}, every page ending on an ayah, lines balanced by dynamic programming over shaped
+text widths, and letters elongated, never shrunk, in the DigitalKhatt reproduction of the hand.</div>
+<div class="small" style="margin-top:16pt">github.com/tarekeldeeb/quran-nazm</div>
+<div class="small" style="margin-top:4pt">Font: DigitalKhatt (Amine Anane), via quran-madina-html.
+Frame and surah headers: quran-assets by quran.ws (CC BY-NC-SA 4.0). Running heads: Amiri Quran.</div>
+"""
+    cover.insert_htmlbox(pymupdf.Rect(20 * MM, 72 * MM, PAGE_W - 20 * MM, PAGE_H - 22 * MM), body,
+                         css=COVER_CSS, archive=arch)
+    doc.set_page_labels([dict(startpage=0, prefix="cover", style="", firstpagenum=1),
+                         dict(startpage=1, style="D", firstpagenum=1)])
+    cat = doc.pdf_catalog()
+    doc.xref_set_key(cat, "ViewerPreferences", "null")  # no right-to-left swap of the spread
+    doc.xref_set_key(cat, "PageLayout", "/TwoPageLeft")  # first page on the left: cover | page 1
+    tmp = path + ".tmp"
+    doc.save(tmp, garbage=3, deflate=True)
+    doc.close()
+    os.replace(tmp, path)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--unit", choices=("juz", "hizb"), default="juz",
                     help="fixed page count per juz (20, juz 30 on 24; the default) or per hizb (10, the last hizb 14)")
-    ap.add_argument("--shrink", type=float, default=0.25, help="largest allowed compression of a line (default 0.25)")
+    ap.add_argument("--shrink", type=float, default=0.19, help="largest allowed compression of a line (default 0.19)")
     ap.add_argument("--out", default=os.path.join(WORK, "quran-nazm.pdf"))
     ap.add_argument("--art", default="hafs-adi", choices=sorted(ART_STYLES) + ["none"],
                     help="page frame and surah header art from assets/art (default hafs-adi; 'none' draws the built-in vector art)")
+    ap.add_argument("--no-cover", action="store_true",
+                    help="leave out the cover page (and keep right-to-left page order for two-page viewers)")
     ap.add_argument("--pages", default=None, help="page range to render, e.g. 1-20 (layout is always computed for the whole book)")
     args = ap.parse_args()
     t0 = time.time()
@@ -977,6 +1116,8 @@ def main():
     pdf.save(args.out, "Quran-Nazm")
     if args.art != "none":
         apply_art(args.out, pdf.art, args.art)
+    if not args.no_cover and lo == 1:
+        add_cover(args.out, args.unit, args.art)
     r, xs = np.array(stats["ratios"]), np.array(stats["xscale"])
     # checks: every page ends on an ayah marker, no line starts with one
     ends_ok = all(p["rows"][-1][0] == "text" and MARK in p["rows"][-1][1][-1] for p in book)
@@ -1003,13 +1144,21 @@ def main():
                collisions_cleared_by_spacing=stats["cleared"],
                word_collisions=len(stats["collisions"]),
                word_collision_examples=stats["collisions"][:10])
+    rep.update(layout_stats(txt, book, W))
     base = os.path.splitext(args.out)[0]
     json.dump(rep, open(base + "-report.json", "w"), ensure_ascii=False, indent=1)
     json.dump([dict(page=i + 1, hizb=p["hizb"], first=list(p["ayahs"][0]), last=list(p["ayahs"][-1]),
                     rows=[r[:2] if r[0] != "title" else list(r) for r in p["rows"]]) for i, p in enumerate(book)],
               open(base + "-layout.json", "w"), ensure_ascii=False)
-    print(json.dumps(rep, ensure_ascii=False, indent=1))
-    print(f"wrote {args.out} ({os.path.getsize(args.out) / 1e6:.1f} MB) in {time.time() - t0:.0f}s")
+    try:
+        madina = json.load(open(os.path.join(DATA, "unit_comparison.json")))["madina_1441h"]
+    except (OSError, KeyError, ValueError):
+        madina = None
+    text = summary_text(rep, madina)
+    open(base + "-summary.txt", "w").write(text + "\n")
+    print(text)
+    print(f"wrote {args.out} ({os.path.getsize(args.out) / 1e6:.1f} MB), {base}-summary.txt, -report.json and "
+          f"-layout.json in {time.time() - t0:.0f}s")
 
 
 if __name__ == "__main__":

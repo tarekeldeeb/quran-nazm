@@ -2,7 +2,8 @@
 
     python scripts/65_nazm_line_stretch.py      # writes data/nazm_line_stretch.json
 
-Stretch of a line = common line width / natural width of its words.
+Stretch of a line = common line width / natural width of its words. Layout: 20 pages per
+juz, 19% compression limit (the renderer's defaults).
 """
 import json
 import os
@@ -14,8 +15,8 @@ from paths import DATA
 import render_mushaf as R
 
 txt = R.Text()
-book, W, _ = R.build_layout(txt, 0.25, "hizb")
-pages = [dict(page=i, hizb=p["hizb"], stretch=[round(W / r[2], 4) for r in p["rows"] if r[0] == "text"])
+book, W, _ = R.build_layout(txt, 0.19, "juz")  # the renderer's defaults
+pages = [dict(page=i, hizb=p["hizb"], juz=p["juz"], stretch=[round(W / r[2], 4) for r in p["rows"] if r[0] == "text"])
          for i, p in enumerate(book, 1)]
 json.dump(dict(line_width=W, pages=pages), open(os.path.join(DATA, "nazm_line_stretch.json"), "w"))
 print(f"{len(pages)} pages written")

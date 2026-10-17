@@ -10,8 +10,9 @@ lines only; Nazm: the renderer's layout, lines over 1.8x are centred and left ou
 The spread of log stretch is split, in squares, into between-juz, between pages of
 a juz and within a page; the between-hizb part is reported separately. These do
 not depend on the line width (a common factor on every line). The type size and
-the median stretch do: Nazm sets the width so that no line is compressed beyond
-25%, and the juz layout is also shown at the hizb layout's type size (93%).
+the median stretch do: Nazm sets the width from its compression limit (25% for the
+hizb design, 19% for the juz design, both giving type at 93% of the print); the juz
+layout is also shown at the print's own type size.
 """
 import json
 import math
@@ -54,8 +55,8 @@ def madina_pages():
     return out, [unit_of(first[p], HZ) for p in sorted(first)], first
 
 
-def nazm_pages(unit):
-    book, W, _ = R.build_layout(txt, 0.25, unit)
+def nazm_pages(unit, shrink):
+    book, W, _ = R.build_layout(txt, shrink, unit)
     out = []
     for p in book:
         s = [W / r[2] for r in p["rows"] if r[0] == "text"]
@@ -105,14 +106,14 @@ def main():
     top = {txt.flat.index(a) + 1 for a in first.values()}
     res["madina_1441h"].update(hizbs_at_page_top=sum(1 for a0, _ in HZ if a0 in top),
                                juz_at_page_top=sum(1 for a0, _ in JZ if a0 in top))
-    for unit in ("hizb", "juz"):
-        pages, W, book = nazm_pages(unit)
-        res[f"nazm_{unit}"] = dict(type_size=15437.6 / W,
+    # each layout at its own compression limit: 25% for the hizb design, 19% (the default) for
+    # the juz design; both then give type at 93% of the print
+    for unit, shrink in (("hizb", 0.25), ("juz", 0.19)):
+        pages, W, book = nazm_pages(unit, shrink)
+        res[f"nazm_{unit}"] = dict(type_size=15437.6 / W, compression_limit=shrink,
                                    pages=len(book), **metrics(pages), **alignment(book))
-        if unit == "juz":
-            Wh = 15437.6 / res["nazm_hizb"]["type_size"]
-            res["nazm_juz_at_hizb_type_size"] = dict(type_size=res["nazm_hizb"]["type_size"],
-                                                     **metrics(pages, scale=Wh / W))
+        if unit == "juz":  # the same juz layout at the print's type size (25% limit)
+            res["nazm_juz_at_print_type_size"] = dict(type_size=1.0, **metrics(pages, scale=15437.6 / W))
     json.dump(res, open(os.path.join(DATA, "unit_comparison.json"), "w"), indent=1)
     keys = list(res["nazm_hizb"].keys())
     print(f"{'':32s}" + "".join(f"{k[:14]:>16s}" for k in res))
