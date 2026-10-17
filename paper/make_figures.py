@@ -5,6 +5,8 @@
 Inputs: data/*.json (measurements), figures/*.png (Madina print crops),
 output/quran-nazm.pdf (the Nazm render). Outputs go to paper/figures/.
 """
+import io
+import sys
 import json
 import os
 
@@ -13,6 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 import numpy as np
+from PIL import Image
 import pymupdf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -235,6 +238,33 @@ for n in sorted(set(fig_pages.values())):
     one.insert_pdf(src, from_page=n - 1 + shift, to_page=n - 1 + shift)
     one.save(os.path.join(OUT, f"nazm-p{n:03d}.pdf"))
     print("figure:", f"nazm-p{n:03d}.pdf")
+# 5b. The print's page 156 inside the same Hafs frame as the Nazm pages, for a fair side-by-side view:
+# the text block of the scan is placed where Nazm's text block sits, under the same quran-assets frame.
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
+import render_mushaf as RM  # noqa: E402
+art = RM.ART_STYLES["hafs-adi"]
+pitch = RM.PITCH_RATIO * RM.BLOCK_W
+x0 = (RM.PAGE_W - RM.BLOCK_W) / 2
+top = RM.PAGE_H - (RM.PAGE_H - RM.LINES * pitch) / 2 + 4
+fw, fh = art["frame_box"]
+sx0, sy0, sw, sh = art["frame_slot"]
+kx = (RM.BLOCK_W + 2 * RM.SLOT_PAD) / sw
+ky = (RM.LINES * pitch + 2 * RM.SLOT_PAD) / sh
+fx0 = x0 - RM.SLOT_PAD - sx0 * kx
+ftop = top + RM.SLOT_PAD + sy0 * ky
+H = RM.PAGE_H
+doc = pymupdf.open()
+pg = doc.new_page(width=RM.PAGE_W, height=H)
+frame = pymupdf.open("pdf", pymupdf.open(os.path.join(ROOT, "assets", "art", "hafs-adi", art["frame"])).convert_to_pdf())
+pg.show_pdf_page(pymupdf.Rect(fx0, H - ftop, fx0 + fw * kx, H - (ftop - fh * ky)), frame, 0, keep_proportion=False)
+scan = Image.open(os.path.join(ROOT, "figures", "01-1441h-page-156.png")).convert("RGB")
+scan = scan.crop((7, 7, scan.width - 7, scan.height - 7))  # drop the scan's own thin rule
+buf = io.BytesIO()
+scan.save(buf, format="PNG")
+pg.insert_image(pymupdf.Rect(x0, H - top, x0 + RM.BLOCK_W, H - (top - RM.LINES * pitch)), stream=buf.getvalue(),
+                 keep_proportion=False)
+doc.save(os.path.join(OUT, "madina-p156-framed.pdf"))
+print("figure: madina-p156-framed.pdf")
 for name in ("01-1441h-page-156.png", "02-p-102-line-4.png", "03-p-102-line-5.png",
              "04-p-561-line-9.png", "05-p-563-line-9.png", "06-p-192-line-1-10-words.png",
              "07-p-192-line-14-5-words.png", "08-p-567-lines-2-3-ayah-marker-split.png"):

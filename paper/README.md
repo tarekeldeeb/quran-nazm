@@ -13,10 +13,11 @@ LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmar
 
 ## Version
 
-The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.0) and printed as a footnote to the title. Bump it on each revision.
+The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.1) and printed as a footnote to the title. Bump it on each revision.
 
 | Version | Changes |
 |---|---|
+| v0.3.1 | Review comments: teaser shows both text blocks in the same Hafs frame at the same size (the print's page 156 placed in the frame by `make_figures.py`) and is smaller, so the abstract fits on page 1; the ayah count in Section 5.2 is now $N$ (Table 1 uses $n$ for rub' per unit); the planned blind reader study is replaced by review from the scholars of the Mushaf review committees; future work adds the other narrations, up to all twenty of the ten readings. |
 | v0.3.0 | New design: every juz on exactly 20 pages (juz 30 on 24) instead of every hizb on 10; compression limit 19%; no surah title below line 11; the font's shrinking features never used. New: the unit question reframed in Section 3; title rule and compression analysis in Design; parameters table, cover and statistics summary in Implementation; three-way comparison Madina vs 10 pages per hizb vs 20 pages per juz (Table 6, Fig. 12); juz-design ablations, exact optimum checked with HiGHS, per-juz stretch, title-rule cost and juz 30 variants in Evaluation. Hizbs at a page top in the print corrected to 38 (was 43, which counted the first three lines). 11 pages including references. |
 | v0.2.0 | Nazm pages use the Hafs al-'Adi page frame and surah headers of quran-assets (CC BY-NC-SA 4.0), so the teaser compares the two text blocks inside the same frame; Output paragraph, captions, Limitations (Design), conclusion and acknowledgements updated; quran-assets cited. Results unchanged. |
 | v0.1.0 | First ACM full-paper version: root variance of the reading units (Section 3), Giza affiliation, Measurement limitation removed. |

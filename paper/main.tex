@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.3.0}% bump on each revision
+\newcommand{\paperversion}{v0.3.1}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -42,16 +42,16 @@ Printed Qurans are organised in reading units (the juz, the hizb and its quarter
 
 \begin{teaserfigure}
   \centering
-  \begin{subfigure}[b]{0.36\textwidth}\centering
-    \includegraphics[width=\linewidth]{figures/madina-01-1441h-page-156.png}
+  \begin{subfigure}[b]{0.3\textwidth}\centering
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/madina-p156-framed.pdf}
     \caption{Madina 1441\,H print, page 156.}
-  \end{subfigure}\hspace{10mm}%
-  \begin{subfigure}[b]{0.395\textwidth}\centering
+  \end{subfigure}\hspace{8mm}%
+  \begin{subfigure}[b]{0.3\textwidth}\centering
     \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p155.pdf}
     \caption{Quran-Nazm, page 155.}
   \end{subfigure}
-  \Description{Two Quran pages side by side, both starting at the same ayah. The printed page has crowded lines at the top and spaced-out lines at the bottom; the Nazm page, inside the same green Madina frame, has evenly filled lines and running heads.}
-  \caption{The same passage, from Al-A'raf 44, in the Madina print and in Quran-Nazm. In the print, line~11 carries 25\% more text than fits at natural size while the lowest lines are spaced out; in Nazm the lines of a page carry equal shares of text. Both pages use the same Hafs frame, so only the text block differs.}
+  \Description{Two Quran pages side by side, both starting at the same ayah. Both pages sit in the same green Madina frame at the same size. The printed page has crowded lines at the top and spaced-out lines at the bottom; the Nazm page has evenly filled lines.}
+  \caption{The same passage, from Al-A'raf 44, in the Madina print and in Quran-Nazm. In the print, line~11 carries 25\% more text than fits at natural size while the lowest lines are spaced out; in Nazm the lines of a page carry equal shares of text. For a fair comparison both text blocks are shown in the same Hafs frame at the same size (the print's text block is taken from the King Fahd Complex PDF~\cite{scan}), so only the setting differs.}
   \label{fig:teaser}
 \end{teaserfigure}
 
@@ -263,7 +263,7 @@ Two constraints come from the tradition: a page ends at the end of an ayah, and 
 \label{fig:method}
 \end{figure}
 
-Let the juz consist of ayahs $1..n$ with natural widths $a_k$ (shaped words plus spaces, each marker glued to its preceding word), and let a surah header count as $h_k\in\{0,1,2\}$ lines of width $q$, the juz's average text per line. With cumulative widths $V_k=\sum_{i\le k}(a_i+h_iq)$ and target $\bar V=V_n/20$, the page cuts $0=c_0<c_1<\dots<c_{20}=n$ at ayah ends minimise
+Let the juz consist of ayahs $1..N$ with natural widths $a_k$ (shaped words plus spaces, each marker glued to its preceding word), and let a surah header count as $h_k\in\{0,1,2\}$ lines of width $q$, the juz's average text per line. With cumulative widths $V_k=\sum_{i\le k}(a_i+h_iq)$ and target $\bar V=V_N/20$, the page cuts $0=c_0<c_1<\dots<c_{20}=N$ at ayah ends minimise
 \begin{equation}
   \sum_{p=1}^{20}\bigl(V_{c_p}-V_{c_{p-1}}-\bar V\bigr)^2+\sum_{p}\pi(c_p),
   \label{eq:pages}
@@ -536,7 +536,9 @@ Everything in this paper is generated from public inputs by the scripts in the Q
 
 \paragraph{Hizb alignment.} Fixing only the juz gives up the alignment of hizbs with page tops (34 of 60). A middle way, hizbs of nine to eleven pages as in the print within a fixed juz, would keep more hizbs at a page top at a small cost in page evenness; it is a design question for readers and teachers who navigate by hizb.
 
-\paragraph{Readers.} Our measures are geometric. A planned reader study will have Quran teachers, calligraphers and regular readers rank paired pages of the print and of Nazm, blind to their source, for evenness, legibility and beauty.
+\paragraph{Expert review.} Our measures are geometric. A judgement of evenness, legibility and beauty is still needed, but a blind study with ordinary readers is not realistic: most readers know the pages of the Madina Mushaf by heart and would recognise its pages, and Nazm's, at a glance. We therefore plan to put paired pages before experienced evaluators, the scholars of the committees that review and approve printed Mushaf editions, who see many layouts of the same text and judge them against the conventions of the tradition rather than against a remembered page.
+
+\paragraph{Other narrations.} Quran-Nazm sets the Hafs narration from `Asim. Nothing in the method is specific to it: given a narration's text with its ayah and reading-unit boundaries, and a font for its script conventions, the same rules apply. A natural extension is to the other narrations, starting with those already printed by the King Fahd Complex (such as Warsh and Qalun from Nafi`, and al-Duri from Abu `Amr), and then to all twenty narrations of the ten canonical readings, so that each can have an evenly set Mushaf from one open program. Each brings its own text, its own ayah count and unit boundaries, and, for some, a different hand to model in the font.
 
 \paragraph{Design.} The page frame and surah headers reuse the ornaments of the Complex's standard Hafs print, traced as vector art by quran-assets; their licence is provisional until the Complex grants permission, so the renderer keeps its own frame and headers as an alternative. The title rule still lets a surah open on line 11 with three lines before a page turn; a stricter limit for surahs that continue on the next page would remove those. The treatment of juz~30 is open to calligraphers' review. Redefining the reading units to equal lengths would remove the root variance, but that is beyond the typesetter's remit.
 
