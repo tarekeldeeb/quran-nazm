@@ -14,7 +14,13 @@
   "gap_share_p95": 0.013676024770689745,
   "gap_share_sd": 0.005566717526038476,
   "lines_scaled": 0.0015236755743084857,
-  "lines_narrowed": 0.153539615564932
+  "lines_narrowed": 0.153539615564932,
+  "distorted_lines": 0.15142991092358182,
+  "distorted_over_5pct": 0.07079231129864041,
+  "distortion_mean": 0.058443761609907115,
+  "distortion_p95": 0.15207000000000004,
+  "distortion_max": 0.266,
+  "distortion_mean_all_lines": 0.00885118846694796
  },
  "nazm": {
   "lines": 8547,
@@ -31,6 +37,12 @@
   "gap_share_p95": 0.013955678663699584,
   "gap_share_sd": 0.0036752833568232963,
   "lines_scaled": 0.13864513864513864,
-  "lines_narrowed": 0.0
+  "lines_narrowed": 0.0,
+  "distorted_lines": 0.13864513864513864,
+  "distorted_over_5pct": 0.04176904176904177,
+  "distortion_mean": 0.0405239894304625,
+  "distortion_p95": 0.10627592134952168,
+  "distortion_max": 0.18259728773584893,
+  "distortion_mean_all_lines": 0.005619911746500516
  }
 }

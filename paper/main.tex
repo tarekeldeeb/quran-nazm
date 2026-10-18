@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.3.6}% bump on each revision
+\newcommand{\paperversion}{v0.3.7}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -172,7 +172,7 @@ Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hol
   \end{tabularx}
 \end{table}
 
-\subsection{Pen weight and texture}
+\subsection{Pen weight and texture}\label{sec:pen}
 On the scanned pages (720\,\x\,1123\,px, about 100\,ppi) we split each page into its 15 line bands, masked the coloured ayah markers, upsampled each band four times and measured the mean pen width as ink area divided by skeleton length. Over 7{,}320 lines on the 488 pages made only of text:
 \begin{itemize}
   \item a heavy line has a 13\% thicker stroke than a light one (5th to 95th percentile), and the spread inside one page is typically 9\%;
@@ -444,8 +444,8 @@ Table~\ref{tab:results} summarises the render against the print, and Fig.~\ref{f
     Lines more than 10\% compressed & 17\% & 2\% \\
     Lines opening with a marker & 6.5\% & 0 \\
     Surah titles below line 11 & 5 & 0 \\
-    Pen weight across lines & $\pm$13\% & uniform \\
-    Lines squeezed horizontally & none & 14\% (max 18\%) \\
+    Pen weight across lines & $\pm$13\% & even on 86\% of lines \\
+    Lines squeezed horizontally & none (pen) & 14\% (max 18\%) \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -478,11 +478,19 @@ Table~\ref{tab:texture} compares texture measures that play no part in Nazm's ob
     Word gap share, median (5th--95th pct.) & 0.94\% ($-$0.43--1.37\%) & 1.21\% (0.36--1.40\%) \\
     Lines with narrowed words & 15\% & 0 \\
     Lines scaled horizontally & 0.2\% & 14\% \\
+    \midrule
+    \multicolumn{3}{@{}l}{\emph{Distortion: letters scaled horizontally by $k<1$}} \\
+    Lines distorted (by more than 5\%) & 15\% (7.1\%) & 14\% (4.2\%) \\
+    $1-k$ on those lines, mean (95th pct.) & 5.8\% (15\%) & 4.1\% (11\%) \\
+    $1-k$, worst line & 27\% & 18\% \\
+    $1-k$, mean over all lines & 0.9\% & 0.6\% \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
 The measures cut both ways. Nazm elongates less than half as much as the reproduction of the print, on fewer lines, and its word gaps vary less from line to line. But its gaps are wider (a median of 1.21\% of the line against 0.94\%), a looser texture that follows from type at 93\% and from widening spaces before letters; and where the reproduction fits 15\% of the print's lines by narrowing individual words, Nazm fits 14\% of its lines by scaling the whole line (Section~\ref{sec:compress}).
+
+The evenness metric of this section is blind to this: a squeezed line counts at its target width, whatever it costs the letters. So the table also reports distortion beside it. A horizontal scale $k$ narrows every letter of the line and thins its vertical strokes by $1-k$, while horizontal strokes keep their weight, so a scaled line is both narrower and lighter in its uprights than its neighbours. Nazm distorts 14\% of its lines, by 4.1\% on average and 18\% at worst; 4.2\% of lines are scaled by more than 5\%. These are not small: at 18\% the thinning is of the order of the $\pm$13\% pen-weight differences we measured on the print (Section~\ref{sec:pen}), and it falls on single lines rather than drifting across a page. For the print the same figures describe its DigitalKhatt reproduction, which must narrow words on 15\% of lines (up to 27\%) to match what the calligrapher wrote; they say how far the print departs from the font's natural forms, not that its pen strokes are distorted. We therefore claim no advantage in distortion, only that Nazm's is bounded by the 19\% limit and confined to one line in seven.
 
 \subsection{Ablations and the exact optimum}\label{sec:ablation}
 Table~\ref{tab:ablation} isolates the optimisers on juz 1--29. Each variant computes its own line width at $\sigma=19\%$.

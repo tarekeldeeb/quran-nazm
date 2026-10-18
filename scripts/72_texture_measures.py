@@ -10,6 +10,10 @@ its own objective. These measures are not:
   elongation share          width added by elongation, over the line width
   word gap share            one ordinary word gap over the line width (mean per line)
   horizontally scaled lines lines whose letters are scaled to fit
+  distortion                share of lines whose letters are scaled horizontally (the
+                            print's reproduction narrows words by `c`, rarely the line by
+                            `x`; Nazm scales the line), and by how much; a scale k thins
+                            vertical strokes by 1 - k
 
 The print is measured on the DigitalKhatt reproduction of its lines in quran-madina-html
 (per-word `jpNN` alternates, per-line spaces `s`, narrowing `c`, scale `x`), full
@@ -64,7 +68,8 @@ def print_lines(txt):
             gaps = [g * 1000 for g in row.get("s", [])]
             out.append(dict(words=len(ws), elongated=sum(1 for _, f in ws if f), elong_share=elong / LW,
                             gap_share=float(np.mean(gaps)) / LW if gaps else None,
-                            scaled="x" in row, narrowed=bool(row.get("c"))))
+                            scaled="x" in row, narrowed=bool(row.get("c")),
+                            scale=row.get("c", 1.0) * row.get("x", 1.0)))
     return out
 
 
@@ -89,7 +94,7 @@ def nazm_lines(txt):
                 n_el += 1
                 elong += J.width(txt.font, w.text, J.to_hb_features(f, w.start, w.start, w.end)) - J.width(txt.font, w.text)
             out.append(dict(words=len(ws), elongated=n_el, elong_share=elong / W, gap_share=res.simple_spacing / W,
-                            scaled=res.x_scale < 0.999, narrowed=False))
+                            scaled=res.x_scale < 0.999, narrowed=False, scale=res.x_scale))
     return out
 
 
@@ -104,7 +109,19 @@ def summary(lines):
                 gap_share_median=float(np.median(g)), gap_share_p5=float(np.percentile(g, 5)),
                 gap_share_p95=float(np.percentile(g, 95)), gap_share_sd=float(g.std()),
                 lines_scaled=float(np.mean([l["scaled"] for l in lines])),
-                lines_narrowed=float(np.mean([l["narrowed"] for l in lines])))
+                lines_narrowed=float(np.mean([l["narrowed"] for l in lines])),
+                **distortion(a("scale")))
+
+
+def distortion(scale):
+    """Horizontal scaling of letters (the print's reproduction narrows words, Nazm
+    scales lines); a scale of k thins vertical strokes by 1 - k."""
+    d = 1 - scale[scale < 0.999]
+    return dict(distorted_lines=float((scale < 0.999).mean()), distorted_over_5pct=float((scale < 0.95).mean()),
+                distortion_mean=float(d.mean()) if len(d) else 0.0,
+                distortion_p95=float(np.percentile(d, 95)) if len(d) else 0.0,
+                distortion_max=float(d.max()) if len(d) else 0.0,
+                distortion_mean_all_lines=float((1 - scale).mean()))
 
 
 def main():

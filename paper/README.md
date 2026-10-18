@@ -13,11 +13,12 @@ LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmar
 
 ## Version
 
-The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.6) and printed as a footnote to the title. Bump it on each revision.
+The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.7) and printed as a footnote to the title. Bump it on each revision.
 
 | Version | Changes |
 |---|---|
-| v0.3.6 | Review issue 1: the evaluation now says its main metric is Nazm's own objective, and adds measures Nazm does not optimise (Table 9, `scripts/72_texture_measures.py`): elongation, word gaps, words per line, narrowing and scaling, against the DigitalKhatt reproduction of the print. |
+| v0.3.7 | Review issue 2: distortion reported beside evenness (Table 8): share of lines whose letters are scaled horizontally, mean, 95th percentile and worst scale, and the thinning of vertical strokes it implies, for Nazm and the print's reproduction; Table 7 no longer calls Nazm's pen weight uniform. |
+| v0.3.6 | Review issue 1: the evaluation now says its main metric is Nazm's own objective, and adds measures Nazm does not optimise (Table 8, `scripts/72_texture_measures.py`): elongation, word gaps, words per line, narrowing and scaling, against the DigitalKhatt reproduction of the print. |
 | v0.3.5 | Al-Safaqisi's method gets its own paragraph in the introduction. |
 | v0.3.4 | Al-Safaqisi's own method, from *Ghayth al-Naf'* (Dar al-Kutub al-'Ilmiyya, 2004): he follows the agreed or well-known hizb starts and closes each quarter on a complete stop at an ayah end (pp. 25, 60). |
 | v0.3.3 | Introduction: the al-Hajjaj letter count reduced to one cited sentence (it is not used by the Madina Mushaf); the Madina boundaries come from *Ghayth al-Naf'* of al-Safaqisi, per the colophon of its Hafs edition. Section 3: how the boundaries were drawn (juz balanced by letters, quarters at breaks in the text), from `scripts/71_letter_counts.py`. |
