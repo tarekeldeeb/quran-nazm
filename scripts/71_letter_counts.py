@@ -17,6 +17,12 @@ combination of six choices is tried on the Uthmani text of the 1441H data:
   tanween  count the nunation as a letter
 
 Ayah markers are not counted. A report point is taken at the end of its ayah.
+
+It also measures how the Madina boundaries (from Ghayth al-Naf' of al-Safaqisi, per
+the colophon of the Complex's Hafs editions) sit against equal letter counts, in
+written letters: how far each juz start lies from its equal-letter position (in
+units of a juz), how far each quarter lies from the equal eighths of its own juz
+(in units of a quarter), and how close cutting at the nearest ayah end could get.
 """
 import itertools
 import json
@@ -44,6 +50,33 @@ PARTS = dict(
 REPORT = {"1/2": ((18, 19), 1 / 2), "1/3": ((9, 100), 1 / 3), "2/3": ((26, 100), 2 / 3),
           "1/7": ((4, 55), 1 / 7), "2/7": ((7, 147), 2 / 7), "3/7": ((13, 35), 3 / 7),
           "4/7": ((22, 34), 4 / 7), "5/7": ((33, 36), 5 / 7), "6/7": ((48, 6), 6 / 7)}
+
+
+def madina_boundaries(letters, flat):
+    starts = json.load(open(os.path.join(DATA, "hafs-rub-start-ayahs.json")))
+    rub = [starts[k] for k in range(1, 241)]               # flat (1-based) start ayah of each quarter
+    c = np.concatenate([[0], np.cumsum(letters)])
+    T = c[-1]
+    juz_off = [abs(c[rub[8 * j] - 1] / T * 30 - j) for j in range(30)]
+    quarter_off = []
+    for j in range(30):
+        a, b = c[rub[8 * j] - 1], (c[rub[8 * j + 8] - 1] if j < 29 else T)
+        quarter_off += [abs((c[rub[8 * j + q] - 1] - a) / (b - a) * 8 - q) for q in range(1, 8)]
+    nearest = []
+    for k in range(1, 240):
+        t = k / 240 * T
+        i = int(np.searchsorted(c, t))
+        nearest.append(min(abs(c[max(i - 1, 0)] - t), abs(c[min(i, len(c) - 1)] - t)) / T * 240)
+    rl = np.diff(np.append([c[r - 1] for r in rub], T))
+    jl = np.add.reduceat(rl, range(0, 240, 8))
+    sura_start = {i + 1 for i, (s, a) in enumerate(flat) if a == 1}
+    return dict(juz_start_offset_mean=float(np.mean(juz_off)), juz_start_offset_max=float(np.max(juz_off)),
+                quarter_offset_in_juz_mean=float(np.mean(quarter_off)), quarter_offset_in_juz_max=float(np.max(quarter_off)),
+                nearest_ayah_end_offset_mean=float(np.mean(nearest)), nearest_ayah_end_offset_max=float(np.max(nearest)),
+                quarter_letters_cv=float(rl.std() / rl.mean()), juz_letters_cv=float(jl.std() / jl.mean()),
+                juz_cv_if_quarters_independent=float(rl.std() / rl.mean() / np.sqrt(8)),
+                quarters_opening_a_surah=sum(1 for r in rub if r in sura_start),
+                juz_opening_a_surah=sum(1 for r in rub[::8] if r in sura_start))
 
 
 def main():
@@ -77,6 +110,7 @@ def main():
     summary["report_2_3_deviation_pct"] = [min(o["report_point_deviation_pct"]["2/3"] for o in out),
                                            max(o["report_point_deviation_pct"]["2/3"] for o in out)]
     summary["closest_to_340740"] = min(out, key=lambda o: abs(o["total"] - 340740))
+    summary["madina_boundaries"] = madina_boundaries(M[:, 0], flat)
     json.dump(dict(summary=summary, conventions=out), open(os.path.join(DATA, "letter_counts.json"), "w"), indent=1)
     for k, v in summary.items():
         print(k, v)

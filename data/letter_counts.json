@@ -56,6 +56,19 @@
    "juz21_start_pct": 66.65872448574378,
    "juz_max_over_min": 1.187215965224264,
    "juz_cv": 0.03310119183157379
+  },
+  "madina_boundaries": {
+   "juz_start_offset_mean": 0.023426945228129027,
+   "juz_start_offset_max": 0.10576976268185945,
+   "quarter_offset_in_juz_mean": 0.14913279375620056,
+   "quarter_offset_in_juz_max": 0.5515651325707189,
+   "nearest_ayah_end_offset_mean": 0.015428190379462652,
+   "nearest_ayah_end_offset_max": 0.10180524054507677,
+   "quarter_letters_cv": 0.13547895152407355,
+   "juz_letters_cv": 0.03162028180139475,
+   "juz_cv_if_quarters_independent": 0.04789904266535797,
+   "quarters_opening_a_surah": 41,
+   "juz_opening_a_surah": 9
   }
  },
  "conventions": [
