@@ -58,7 +58,7 @@ python scripts/render_mushaf.py
 |---|---|
 | `scripts/render_mushaf.py` | the typesetter: layout and PDF writer |
 | `scripts/00_prepare.py` | extracts fonts (and scan pages, for the analysis) |
-| `scripts/10_*` … `scripts/71_*` | the research scripts behind each finding and every table of the paper, numbered by stage |
+| `scripts/10_*` … `scripts/72_*` | the research scripts behind each finding and every table of the paper, numbered by stage |
 | `scripts/joint_layout.py` | exact joint page and line breaking (nested dynamic programming, checked with HiGHS) |
 | `docs/findings.md` | measurements, comparisons and decisions |
 | `docs/RENDERING.md` | how to generate the PDF, step by step |

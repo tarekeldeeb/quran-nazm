@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.3.5}% bump on each revision
+\newcommand{\paperversion}{v0.3.6}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -380,6 +380,8 @@ Quran-Nazm~\cite{nazm} is a single Python program, \texttt{render\_mushaf.py}, b
 \section{Evaluation}\label{sec:results}
 All comparisons with the print are measured the same way, on juz 1--29 (juz 30 is an exception in every layout): the stretch of a line is the line width over its natural width, shaped unstretched in DigitalKhatt; for the print, its own full lines; for Nazm, its layout, with centred lines left out. Spreads are standard deviations of $\log s_\ell$; as the line width multiplies every line alike, they do not depend on the type size.
 
+These spreads measure what Nazm optimises. Eqs.~\ref{eq:pages} and~\ref{eq:lines} balance natural widths, so a smaller spread of stretch than the print's, which was never composed to that criterion, is expected rather than discovered; what the spreads show is how much evenness of stretch the rules buy and where in the book (Section~\ref{sec:units-eval}). Section~\ref{sec:texture} adds measures that Nazm does not optimise.
+
 \subsection{Which unit to fix: Madina, 10 pages per hizb, 20 pages per juz}\label{sec:units-eval}
 Table~\ref{tab:units3} and Fig.~\ref{fig:variance} compare the print with the two designs of Nazm, each at the same type size (93\% of the print: the hizb design at its 25\% limit, the juz design at 19\%). The spread of all lines splits, in squares, into three parts: between juz, between the pages of a juz, and within a page.
 
@@ -457,6 +459,30 @@ Table~\ref{tab:results} summarises the render against the print, and Fig.~\ref{f
 \end{figure}
 
 The price is visible in two places. Nazm stretches more on average (median 1.07\x): type at 93\% leaves the median line a little short of the width, a choice made to limit squeezing, since at the print's own size (25\% limit) nearly half the lines would be squeezed (Table~\ref{tab:shrink}). And one line in seven is compressed partly by horizontal scaling. Both trace to the compression side of the font, which elongates gracefully but has no safe way to contract a word inside a line.
+
+\subsection{Measures Nazm does not optimise}\label{sec:texture}
+Table~\ref{tab:texture} compares texture measures that play no part in Nazm's objective, on the same lines. The print is measured on the DigitalKhatt reproduction fitted to its lines in quran-madina-html (each word's elongation alternates, each line's word gaps, narrowed words and scale), so these are properties of the reproduction, not of the pen strokes. Elongation is the width each word gains from its elongation features, shaped with and without them in the same font.
+
+\begin{table}[t]
+  \centering\small
+  \caption{Texture measures not optimised by Nazm (juz 1--29). Shares are of the line width; print: its DigitalKhatt reproduction.}
+  \label{tab:texture}
+  \begin{tabularx}{\linewidth}{@{}Xcc@{}}
+    \toprule
+    & Print & Nazm \\
+    \midrule
+    Words per line, mean (s.d.) & 8.8 (1.5) & 8.8 (1.4) \\
+    Elongated words per line & 2.5 & 1.3 \\
+    Lines with any elongation & 65\% & 46\% \\
+    Elongation share, mean (95th pct.) & 7.3\% (23\%) & 3.2\% (13\%) \\
+    Word gap share, median (5th--95th pct.) & 0.94\% ($-$0.43--1.37\%) & 1.21\% (0.36--1.40\%) \\
+    Lines with narrowed words & 15\% & 0 \\
+    Lines scaled horizontally & 0.2\% & 14\% \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The measures cut both ways. Nazm elongates less than half as much as the reproduction of the print, on fewer lines, and its word gaps vary less from line to line. But its gaps are wider (a median of 1.21\% of the line against 0.94\%), a looser texture that follows from type at 93\% and from widening spaces before letters; and where the reproduction fits 15\% of the print's lines by narrowing individual words, Nazm fits 14\% of its lines by scaling the whole line (Section~\ref{sec:compress}).
 
 \subsection{Ablations and the exact optimum}\label{sec:ablation}
 Table~\ref{tab:ablation} isolates the optimisers on juz 1--29. Each variant computes its own line width at $\sigma=19\%$.

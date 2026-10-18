@@ -1,0 +1,36 @@
+{
+ "madina_1441h": {
+  "lines": 8532,
+  "words_mean": 8.794889826535396,
+  "words_sd": 1.4683349895039017,
+  "elongated_words_mean": 2.4567510548523206,
+  "lines_with_elongation": 0.6480309423347398,
+  "elongated_words_p95": 6.0,
+  "elong_share_mean": 0.07264654346651417,
+  "elong_share_p95": 0.2301393999067212,
+  "elong_share_sd": 0.07981015762058792,
+  "gap_share_median": 0.009439363055857847,
+  "gap_share_p5": -0.004263015447525994,
+  "gap_share_p95": 0.013676024770689745,
+  "gap_share_sd": 0.005566717526038476,
+  "lines_scaled": 0.0015236755743084857,
+  "lines_narrowed": 0.153539615564932
+ },
+ "nazm": {
+  "lines": 8547,
+  "words_mean": 8.788931788931789,
+  "words_sd": 1.3581362594969455,
+  "elongated_words_mean": 1.326079326079326,
+  "lines_with_elongation": 0.457002457002457,
+  "elongated_words_p95": 5.0,
+  "elong_share_mean": 0.03182867250557493,
+  "elong_share_p95": 0.12819957946065647,
+  "elong_share_sd": 0.04654401068187372,
+  "gap_share_median": 0.012141033095866609,
+  "gap_share_p5": 0.00360668390661574,
+  "gap_share_p95": 0.013955678663699584,
+  "gap_share_sd": 0.0036752833568232963,
+  "lines_scaled": 0.13864513864513864,
+  "lines_narrowed": 0.0
+ }
+}
