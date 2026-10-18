@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.3.7}% bump on each revision
+\newcommand{\paperversion}{v0.3.8}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -128,7 +128,7 @@ A stricter choice is to fix every hizb to exactly ten pages, so that each hizb, 
 \end{figure}
 
 \section{How the Madina print absorbs it}\label{sec:problem}
-Within a juz of fixed length, the print still has to fill 300 lines of fixed width with text of uneven density. We measure how it did so, from two sources: the line breaks of the print, from the DigitalKhatt layout data used by quran-madina-html~\cite{qmh}, and the printed pages themselves, from the King Fahd Complex PDF~\cite{scan}.
+Within a juz of fixed length, the print still has to fill 300 lines of fixed width with text of uneven density. We measure how it did so, from three sources: the line breaks of the print, from the DigitalKhatt layout data used by quran-madina-html~\cite{qmh}; the printed pages themselves, from the King Fahd Complex PDF~\cite{scan}; and the Complex's QCF4 font, which traces every word of the print as a glyph~\cite{qcf4}.
 
 \subsection{Line density}
 Each full line of the print was shaped once, with no justification, and its natural length compared with the fixed line width. If the hand were set evenly, all lines would sit near 100\%. Fig.~\ref{fig:density} shows they do not: natural length runs from 62\% to 136\%; 15\% of lines are more than 10\% short and had to be stretched, and 18\% are more than 10\% long and had to be compressed. A full line holds 4 to 15 words and 21 to 52 letters.
@@ -168,9 +168,22 @@ Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hol
     Ink per letter, sparse vs crowded lines & 1.36\x \\
     Lines opening with an ayah marker & 573 (6.5\%) \\
     Surah titles below line 11 & 5 \\
+    \midrule
+    DK vs written width, recurring words ($r$) & 0.94 \\
+    DK vs written width, per line ($r$) & 0.98 \\
+    Spread inside a page: DK / written widths & 0.062 / 0.073 \\
     \bottomrule
   \end{tabularx}
 \end{table}
+
+\subsection{Is the font a fair yardstick?}\label{sec:yardstick}
+Every stretch figure for the print rests on DigitalKhatt's natural width, a type designer's reconstruction of the hand rather than the hand itself. To test it against the calligrapher's own widths we used QCF4, the King Fahd Complex's font of the 1441\,H print, in which each word of each page is a glyph traced from the page~\cite{qcf4}. A glyph's ink width is the word's width as written on its line, with whatever elongation or scaling it received there. On the 8{,}515 full lines of juz 1--29 (74{,}911 words, matched one to one with the DigitalKhatt text), 68\% of the words belong to the 2{,}167 words that occur at least five times. For each of these, the median of its written widths over its occurrences estimates the calligrapher's natural width of that word.
+\begin{itemize}
+  \item \emph{Words.} The calligrapher's natural width follows DigitalKhatt's at $r=0.94$ on a log scale, with slope 0.96 and a residual of 0.12. That is about as much as one word varies between its own occurrences (median 0.10): the font disagrees with the hand by about as much as the hand varies.
+  \item \emph{Lines.} Summed over the recurring words of a line, the calligrapher's natural width follows DigitalKhatt's at $r=0.98$ (residual 0.057), closer than the letter count does ($r=0.96$, residual 0.091).
+  \item \emph{The print's stretch.} Measured with the calligrapher's widths (and DigitalKhatt's, rescaled, for the rarer words), the print's line stretch correlates with the DigitalKhatt measure at $r=0.83$. Its spread is 0.106 against 0.104; inside a page it is 0.073 against 0.062, and between pages 0.076 against 0.081.
+\end{itemize}
+So the unevenness of the print is not an artefact of the font: measured with the hand's own word widths it is as large overall, and larger inside a page. We keep the DigitalKhatt measure throughout, because it covers every word and is the same yardstick Nazm is set with; Nazm's own figures need no stand-in, since its lines are set in that font.
 
 \subsection{Pen weight and texture}\label{sec:pen}
 On the scanned pages (720\,\x\,1123\,px, about 100\,ppi) we split each page into its 15 line bands, masked the coloured ayah markers, upsampled each band four times and measured the mean pen width as ink area divided by skeleton length. Over 7{,}320 lines on the 488 pages made only of text:
@@ -567,7 +580,7 @@ Fixing every juz to twenty pages moves the root variance of Section~\ref{sec:uni
 \end{table}
 
 \section{Reproducibility}\label{sec:repro}
-Everything in this paper is generated from public inputs by the scripts in the Quran-Nazm repository~\cite{nazm}: the text and layout data and the DigitalKhatt fonts of quran-madina-html~\cite{qmh}, the reading-unit boundaries of quran-meta~\cite{quranmeta}, and the King Fahd Complex PDF~\cite{scan} for the scan measurements. Numbered scripts reproduce each measurement (line density, pen weight, ayah markers, unit lengths, the design studies, the ablations, the title rule, the exact optimum and the three-way comparison) and write their results to JSON files in the repository; \texttt{render\_mushaf.py} produces the Mushaf, its statistics summary, a full report and the page layout; and a separate script rebuilds every figure of the paper. The renderer is deterministic: re-running it reproduces the published report exactly. Its parameters (Table~\ref{tab:params}) make the alternatives of this paper one command each, the hizb design included.
+Everything in this paper is generated from public inputs by the scripts in the Quran-Nazm repository~\cite{nazm}: the text and layout data and the DigitalKhatt fonts of quran-madina-html~\cite{qmh}, the reading-unit boundaries of quran-meta~\cite{quranmeta}, the King Fahd Complex PDF~\cite{scan} for the scan measurements, and the QCF4 word glyphs~\cite{qcf4} for the check of the yardstick. Numbered scripts reproduce each measurement (line density, pen weight, ayah markers, unit lengths, the design studies, the ablations, the title rule, the exact optimum and the three-way comparison) and write their results to JSON files in the repository; \texttt{render\_mushaf.py} produces the Mushaf, its statistics summary, a full report and the page layout; and a separate script rebuilds every figure of the paper. The renderer is deterministic: re-running it reproduces the published report exactly. Its parameters (Table~\ref{tab:params}) make the alternatives of this paper one command each, the hizb design included.
 
 \section{Limitations and future work}\label{sec:limits}
 \paragraph{Compression.} One line in seven is compressed partly by horizontal scaling. The font offers no safe narrow forms today (Section~\ref{sec:compress}); a set of compression forms in DigitalKhatt that keep letters clear inside a full line (narrower alternates, tighter ligatures, shorter tails), or a reviewed subset of the existing \texttt{shrr} tucks, would remove most of it and allow type at the print's size.
