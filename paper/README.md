@@ -13,10 +13,11 @@ LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmar
 
 ## Version
 
-The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.4) and printed as a footnote to the title. Bump it on each revision.
+The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.5) and printed as a footnote to the title. Bump it on each revision.
 
 | Version | Changes |
 |---|---|
+| v0.3.5 | Al-Safaqisi's method gets its own paragraph in the introduction. |
 | v0.3.4 | Al-Safaqisi's own method, from *Ghayth al-Naf'* (Dar al-Kutub al-'Ilmiyya, 2004): he follows the agreed or well-known hizb starts and closes each quarter on a complete stop at an ayah end (pp. 25, 60). |
 | v0.3.3 | Introduction: the al-Hajjaj letter count reduced to one cited sentence (it is not used by the Madina Mushaf); the Madina boundaries come from *Ghayth al-Naf'* of al-Safaqisi, per the colophon of its Hafs edition. Section 3: how the boundaries were drawn (juz balanced by letters, quarters at breaks in the text), from `scripts/71_letter_counts.py`. |
 | v0.3.2 | Introduction: the historical origin of the division into equal parts, attributed to the time of al-Hajjaj ibn Yusuf al-Thaqafi, with its sources (Ibn Abi Dawud, *Kitab al-Masahif*; Ibn Kathir, *Tafsir*, vol. 1 p. 141), and its check on today's text under several letter-counting conventions (`scripts/71_letter_count.py`). |
