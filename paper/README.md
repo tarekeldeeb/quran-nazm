@@ -13,10 +13,11 @@ LaTeX sources of the article introducing Quran-Nazm, in the ACM template (`acmar
 
 ## Version
 
-The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.8) and printed as a footnote to the title. Bump it on each revision.
+The paper's version is set by `\paperversion` near the top of `main.tex` (currently v0.3.9) and printed as a footnote to the title. Bump it on each revision.
 
 | Version | Changes |
 |---|---|
+| v0.3.9 | Review issue 4: pen weight re-measured on QCF4 vector outlines at about 600 ppi (`scripts/74_pen_weight_vector.py`) and reported beside the scan. Line-level effects hold (heavy vs light 12%, page 102 +15%, ink per letter vs crowding r = -0.68); the late-book rise and page 561 vs 563 (19% on the scan, 5% on vectors) do not, and are now attributed to printing or scanning. |
 | v0.3.8 | Review issue 3: new Section 4.2 checks DigitalKhatt's natural width against the calligrapher's own word widths from QCF4 (`scripts/73_scan_validation.py`): words r = 0.94, lines r = 0.98 (letter count 0.96), and the print's spread is as large measured either way (inside a page 0.073 vs 0.062). |
 | v0.3.7 | Review issue 2: distortion reported beside evenness (Table 8): share of lines whose letters are scaled horizontally, mean, 95th percentile and worst scale, and the thinning of vertical strokes it implies, for Nazm and the print's reproduction; Table 7 no longer calls Nazm's pen weight uniform. |
 | v0.3.6 | Review issue 1: the evaluation now says its main metric is Nazm's own objective, and adds measures Nazm does not optimise (Table 8, `scripts/72_texture_measures.py`): elongation, word gaps, words per line, narrowing and scaling, against the DigitalKhatt reproduction of the print. |

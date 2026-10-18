@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.3.8}% bump on each revision
+\newcommand{\paperversion}{v0.3.9}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -153,7 +153,7 @@ Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hol
 
 \begin{table}[t]
   \centering\small
-  \caption{Layout variance measured on the Madina 1441\,H print.}
+  \caption{Layout variance measured on the Madina 1441\,H print. Pen figures: scan / QCF4 vector outlines.}
   \label{tab:madina}
   \begin{tabularx}{\linewidth}{@{}Xr@{}}
     \toprule
@@ -163,9 +163,9 @@ Word count alone does not explain this. On page~72, lines 10, 11 and 12 each hol
     Words / letters on a full line & 4--15 / 21--52 \\
     Natural length vs.\ line width & 62--136\% \\
     Lines off by more than 10\% & 33\% \\
-    Pen width, light vs heavy line (5th--95th pct.) & +13\% \\
-    Pen width spread inside one page (median) & 9\% \\
-    Ink per letter, sparse vs crowded lines & 1.36\x \\
+    Pen width, light vs heavy line (5th--95th pct.) & +13\% / +12\% \\
+    Pen width spread inside one page (median) & 9\% / 11\% \\
+    Ink per letter, 5th--95th pct.\ (scan / vectors) & 1.36\x{} / 1.35\x \\
     Lines opening with an ayah marker & 573 (6.5\%) \\
     Surah titles below line 11 & 5 \\
     \midrule
@@ -186,14 +186,13 @@ Every stretch figure for the print rests on DigitalKhatt's natural width, a type
 So the unevenness of the print is not an artefact of the font: measured with the hand's own word widths it is as large overall, and larger inside a page. We keep the DigitalKhatt measure throughout, because it covers every word and is the same yardstick Nazm is set with; Nazm's own figures need no stand-in, since its lines are set in that font.
 
 \subsection{Pen weight and texture}\label{sec:pen}
-On the scanned pages (720\,\x\,1123\,px, about 100\,ppi) we split each page into its 15 line bands, masked the coloured ayah markers, upsampled each band four times and measured the mean pen width as ink area divided by skeleton length. Over 7{,}320 lines on the 488 pages made only of text:
+We measured pen weight from two sources, on the 7{,}305 full lines of the 487 pages of juz 1--29 made only of text. On the \emph{scan} (720\,\x\,1123\,px, about 100\,ppi) we split each page into its 15 line bands, masked the coloured ayah markers, upsampled each band four times and took the mean pen width as ink area divided by skeleton length. At this resolution a stroke is about two pixels wide, so we repeated every measurement on \emph{vector outlines}: the QCF4 glyphs of the same lines~\cite{qcf4}, rasterised at about 600\,ppi, where a stroke is about 13 pixels wide. The two agree line by line at $r=0.62$ for pen width and $r=0.87$ for ink per letter; a tracing may smooth the pen and a scan adds noise, so we report what both show (scan / vector):
 \begin{itemize}
-  \item a heavy line has a 13\% thicker stroke than a light one (5th to 95th percentile), and the spread inside one page is typically 9\%;
-  \item on page~102, line~5 is 16\% heavier than line~4 directly above it (Fig.~\ref{fig:crops}(a));
-  \item weight follows crowding (Fig.~\ref{fig:weight}): sparse lines, which were stretched, are written with 6\% thicker strokes than crowded ones, and ink per letter spans 1.36\x{} and correlates with crowding at $r=-0.61$. On page~192 a five-word line carries 65\% more ink per letter than a ten-word line of the same page (Fig.~\ref{fig:crops}(c));
-  \item weight also drifts across the book (Fig.~\ref{fig:drift}): it falls steadily over the first 500 pages ($r=-0.44$ with the page number), then rises by about 4\% in pages 540--580, where page~561 is 19\% heavier than page~563 (Fig.~\ref{fig:crops}(b)).
+  \item a heavy line has a thicker stroke than a light one by 13\% / 12\% (5th to 95th percentile), and the heaviest line of a page is typically 9\% / 11\% heavier than its lightest;
+  \item on page~102, line~5 is 16\% / 15\% heavier than line~4 directly above it (Fig.~\ref{fig:crops}(a));
+  \item weight follows crowding (Fig.~\ref{fig:weight}): sparse lines (more than 10\% short), which were stretched, are written with 4\% / 7\% thicker strokes than crowded ones (more than 10\% long), and pen width correlates with crowding at $r=-0.36$ / $-0.61$. Ink per letter spans 1.36\x{} / 1.35\x{} (5th to 95th percentile) and correlates with crowding at $r=-0.61$ / $-0.68$. On page~192 a five-word line carries 65\% more ink per letter than a ten-word line of the same page (Fig.~\ref{fig:crops}(c)).
 \end{itemize}
-The likely mechanism is scaling of written words to fit: a line scaled up gains stroke weight as well as length. At this resolution a stroke is about two pixels wide, so we read these figures as relative differences; the crops show that they are visible.
+These line-level effects hold on both sources, and are stronger on the vectors. The likely mechanism is scaling of written words to fit: a line scaled up gains stroke weight as well as length. What does \emph{not} hold is a drift across the book. On the scan, weight falls over the first 500 pages ($r=-0.43$ with the page number) and rises by about 2\% in pages 540--580, where page~561 is 19\% heavier than page~563 (Figs.~\ref{fig:crops}(b) and~\ref{fig:drift}). On the vectors the fall is weaker ($r=-0.29$), there is no late rise, and page~561 is only 5\% heavier than page~563. We therefore attribute the late rise to the printing or scanning of those pages, not to the hand, and draw no conclusion from it.
 
 \begin{figure*}[t]
   \centering
@@ -204,7 +203,7 @@ The likely mechanism is scaling of written words to fit: a line scaled up gains 
         {(a) Neighbouring lines written with different pens.}\hfill
   \panel{\crop{madina-04-p-561-line-9.png}{p.\,561, line 9: pen 2.85\,px, the heaviest page measured}%
          \crop{madina-05-p-563-line-9.png}{p.\,563, line 9: pen 2.14\,px, two pages later}}%
-        {(b) The same line slot on nearby pages.}\\[8pt]
+        {(b) The same line slot on nearby pages (a scan effect: 5\% on the vectors).}\\[8pt]
   \panel{\crop{madina-06-p-192-line-1-10-words.png}{p.\,192, line 1: 10 words, natural length 97\%, 89\,px$^2$ ink per letter}%
          \crop{madina-07-p-192-line-14-5-words.png}{p.\,192, line 14: 5 words, natural length 67\%, 147\,px$^2$ ink per letter (+65\%)}}%
         {(c) One page, two textures: a sparse line is stretched, enlarged and darkened.}\hfill
@@ -227,7 +226,7 @@ The likely mechanism is scaling of written words to fit: a line scaled up gains 
   \centering
   \includegraphics[width=\linewidth]{figures/fig_page_drift.pdf}
   \Description{Scatter plot of average pen width per page against page number. Values drift down from about 2.3 to 2.2 pixels over the first 500 pages, then rise, with page 561 the highest at about 2.6 and page 563 low at about 2.17.}
-  \caption{Average pen width of each all-text page of the print.}
+  \caption{Average pen width of each all-text page of the print, on the scan. The rise after page 540 does not appear on the vector outlines (Section~\ref{sec:pen}).}
   \label{fig:drift}
 \end{figure}
 
@@ -580,7 +579,7 @@ Fixing every juz to twenty pages moves the root variance of Section~\ref{sec:uni
 \end{table}
 
 \section{Reproducibility}\label{sec:repro}
-Everything in this paper is generated from public inputs by the scripts in the Quran-Nazm repository~\cite{nazm}: the text and layout data and the DigitalKhatt fonts of quran-madina-html~\cite{qmh}, the reading-unit boundaries of quran-meta~\cite{quranmeta}, the King Fahd Complex PDF~\cite{scan} for the scan measurements, and the QCF4 word glyphs~\cite{qcf4} for the check of the yardstick. Numbered scripts reproduce each measurement (line density, pen weight, ayah markers, unit lengths, the design studies, the ablations, the title rule, the exact optimum and the three-way comparison) and write their results to JSON files in the repository; \texttt{render\_mushaf.py} produces the Mushaf, its statistics summary, a full report and the page layout; and a separate script rebuilds every figure of the paper. The renderer is deterministic: re-running it reproduces the published report exactly. Its parameters (Table~\ref{tab:params}) make the alternatives of this paper one command each, the hizb design included.
+Everything in this paper is generated from public inputs by the scripts in the Quran-Nazm repository~\cite{nazm}: the text and layout data and the DigitalKhatt fonts of quran-madina-html~\cite{qmh}, the reading-unit boundaries of quran-meta~\cite{quranmeta}, the King Fahd Complex PDF~\cite{scan} for the scan measurements, and the QCF4 word glyphs~\cite{qcf4} for the check of the yardstick and the vector pen-weight measurements. Numbered scripts reproduce each measurement (line density, pen weight, ayah markers, unit lengths, the design studies, the ablations, the title rule, the exact optimum and the three-way comparison) and write their results to JSON files in the repository; \texttt{render\_mushaf.py} produces the Mushaf, its statistics summary, a full report and the page layout; and a separate script rebuilds every figure of the paper. The renderer is deterministic: re-running it reproduces the published report exactly. Its parameters (Table~\ref{tab:params}) make the alternatives of this paper one command each, the hizb design included.
 
 \section{Limitations and future work}\label{sec:limits}
 \paragraph{Compression.} One line in seven is compressed partly by horizontal scaling. The font offers no safe narrow forms today (Section~\ref{sec:compress}); a set of compression forms in DigitalKhatt that keep letters clear inside a full line (narrower alternates, tighter ligatures, shorter tails), or a reviewed subset of the existing \texttt{shrr} tucks, would remove most of it and allow type at the print's size.
