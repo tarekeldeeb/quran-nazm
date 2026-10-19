@@ -24,7 +24,7 @@
  "nazm_hizb": {
   "type_size": 0.9299058805812815,
   "compression_limit": 0.25,
-  "pages": 602,
+  "pages": 604,
   "lines": 8516,
   "stretch_median": 1.0708756663292633,
   "stretch_p5": 0.895912034538586,
@@ -47,7 +47,7 @@
  "nazm_juz": {
   "type_size": 0.9279757246128524,
   "compression_limit": 0.19,
-  "pages": 602,
+  "pages": 604,
   "lines": 8520,
   "stretch_median": 1.068828424759403,
   "stretch_p5": 0.9398666125821824,

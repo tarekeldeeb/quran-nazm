@@ -10,8 +10,8 @@
   "spread_between_pages": 0.04729976777536796,
   "sparsest_page": 1.3241214218041615,
   "densest_page": 0.8823435807600699,
-  "sparsest_page_number": 43,
-  "densest_page_number": 119,
+  "sparsest_page_number": 45,
+  "densest_page_number": 121,
   "lines_compressed": 0.20187793427230047,
   "lines_squeezed": 0.14294096936979228,
   "squeeze_max": 0.18259728773584893
@@ -28,8 +28,8 @@
    "spread_between_pages": 0.04742013623409504,
    "sparsest_page": 1.4712460242268461,
    "densest_page": 0.9803817564000774,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.014438314356145088,
    "lines_squeezed": 0.008684426710479991,
    "squeeze_max": 0.09177476415094332
@@ -45,8 +45,8 @@
    "spread_between_pages": 0.04742013623409504,
    "sparsest_page": 1.389510133992021,
    "densest_page": 0.9259161032667398,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.0714872637633525,
    "lines_squeezed": 0.04518249031803779,
    "squeeze_max": 0.14223172169811327
@@ -62,8 +62,8 @@
    "spread_between_pages": 0.04729976777536796,
    "sparsest_page": 1.3241214218041615,
    "densest_page": 0.8823435807600699,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.20187793427230047,
    "lines_squeezed": 0.14294096936979228,
    "squeeze_max": 0.18259728773584893
@@ -79,8 +79,8 @@
    "spread_between_pages": 0.047252124742636424,
    "sparsest_page": 1.2260383535223716,
    "densest_page": 0.8169847970000644,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.553104095763408,
    "lines_squeezed": 0.4579274733012557,
    "squeeze_max": 0.24314563679245282
@@ -96,8 +96,8 @@
    "spread_between_pages": 0.047252124742636424,
    "sparsest_page": 1.062566573052722,
    "densest_page": 0.7080534907333893,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.9683135782185189,
    "lines_squeezed": 0.9504752963267222,
    "squeeze_max": 0.3440595518867924
@@ -115,8 +115,8 @@
    "spread_between_pages": 0.04729976777536796,
    "sparsest_page": 1.3241214218041615,
    "densest_page": 0.8823435807600699,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.20187793427230047,
    "lines_squeezed": 0.14294096936979228,
    "squeeze_max": 0.18259728773584893
@@ -132,8 +132,8 @@
    "spread_between_pages": 0.07047198707567671,
    "sparsest_page": 1.8755162611396117,
    "densest_page": 0.8805582845695642,
-   "sparsest_page_number": 44,
-   "densest_page_number": 572,
+   "sparsest_page_number": 46,
+   "densest_page_number": 574,
    "lines_compressed": 0.025511403715024687,
    "lines_squeezed": 0.01760356765637836,
    "squeeze_max": 0.1741649264673213
@@ -149,8 +149,8 @@
    "spread_between_pages": 0.07042137808790548,
    "sparsest_page": 1.8806009328179545,
    "densest_page": 0.8807517632020692,
-   "sparsest_page_number": 44,
-   "densest_page_number": 572,
+   "sparsest_page_number": 46,
+   "densest_page_number": 574,
    "lines_compressed": 0.03597883597883598,
    "lines_squeezed": 0.024292923365802136,
    "squeeze_max": 0.1741649264673213
@@ -169,8 +169,8 @@
    "spread_between_pages": 0.046972988266155216,
    "sparsest_page": 1.3791291944454314,
    "densest_page": 0.8823435807600699,
-   "sparsest_page_number": 479,
-   "densest_page_number": 119,
+   "sparsest_page_number": 481,
+   "densest_page_number": 121,
    "lines_compressed": 0.20075179137789265
   },
   "with_rule": {
@@ -185,8 +185,8 @@
    "spread_between_pages": 0.04729976777536796,
    "sparsest_page": 1.3241214218041615,
    "densest_page": 0.8823435807600699,
-   "sparsest_page_number": 43,
-   "densest_page_number": 119,
+   "sparsest_page_number": 45,
+   "densest_page_number": 121,
    "lines_compressed": 0.20187793427230047
   },
   "pages_changed": 107
