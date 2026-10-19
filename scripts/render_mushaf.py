@@ -238,15 +238,14 @@ def titles_ok(segs):
 
 PAGES_PER_JUZ = 20
 
-# The opening spread, as in every printed Mushaf: Al-Fatiha on page "ا" and Al-Baqara 1-5
-# on page "ب", each in a reduced block whose lines narrow towards its top and bottom. The
-# spread counts as two of juz 1's twenty pages, so the rest of juz 1 (Al-Baqara 6 on) takes
-# 18 full pages and the numbered pages 1, 2, ... start after it, as in the print (602
-# numbered pages + the spread). Line widths relative to the line width of the book, from
-# the shape of the print's opening pages.
-OPENING = {"ا": dict(ayahs=[(1, a) for a in range(1, 8)], shape=[0.47, 0.63, 0.82, 0.82, 0.78, 0.61, 0.36]),
-           "ب": dict(ayahs=[(2, a) for a in range(1, 6)], shape=[0.64, 0.81, 0.83, 0.80, 0.61, 0.37])}
-OPENING_AYAHS = {a for o in OPENING.values() for a in o["ayahs"]}
+# The opening spread, as in every printed Mushaf: Al-Fatiha on page 1 and Al-Baqara 1-5 on
+# page 2, each in a reduced block whose lines narrow towards its top and bottom. They are
+# two of juz 1's twenty pages, so the rest of juz 1 (Al-Baqara 6 on) takes 18 full pages,
+# from page 3. Line widths relative to the line width of the book, from the shape of the
+# print's opening pages.
+OPENING = [dict(ayahs=[(1, a) for a in range(1, 8)], shape=[0.47, 0.63, 0.82, 0.82, 0.78, 0.61, 0.36]),
+           dict(ayahs=[(2, a) for a in range(1, 6)], shape=[0.64, 0.81, 0.83, 0.80, 0.61, 0.37])]
+OPENING_AYAHS = {a for o in OPENING for a in o["ayahs"]}
 OPENING_STRETCH = 1.07   # the book's median line stretch, kept on the opening lines
 
 
@@ -289,7 +288,7 @@ def opening_pages(txt, W):
     shape is scaled so its lines keep the book's median stretch, and never wider than W.
     Text rows carry their own width as a fourth field."""
     pages = []
-    for label, o in OPENING.items():
+    for o in OPENING:
         s = o["ayahs"][0][0]
         units = [u for sa in o["ayahs"] for u in txt.units(*sa)]
         ws = [w for _, w in units]
@@ -299,9 +298,9 @@ def opening_pages(txt, W):
         rows = [("title", s)] + ([("basmala",)] if header_lines(s) == 2 else []) + [("gap",)]
         for (a, b), t in zip(shaped_lines(ws, targets, txt.sp), targets):
             rows.append(("text", [u for u, _ in units[a:b]], sum(ws[a:b]) + txt.sp * (b - a - 1), t))
-        pages.append(dict(label=label, opening=True, ayahs=o["ayahs"], hizb=1, juz=1, rows=rows))
+        pages.append(dict(opening=True, ayahs=o["ayahs"], hizb=1, juz=1, rows=rows))
     return pages
-JUZ30_PAGES_AS_JUZ = 24  # --unit juz: juz 30 cannot fit 20 pages under the title rule; 24 keeps the book at 604 sheets (602 numbered + the opening spread)
+JUZ30_PAGES_AS_JUZ = 24  # --unit juz: juz 30 cannot fit 20 pages under the title rule; 24 keeps the book at 604 pages
 
 
 def juz_ranges():
@@ -494,6 +493,7 @@ def build_layout(txt, shrink, unit="juz"):
             book.append(dict(hizb=h + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
+    book = opening_pages(txt, W) + book
     # Juz 30: hizb 59 on 10 pages like every hizb, hizb 60 the exception; pages scored by lines needed
     for h in (59, 60):
         a0, a1 = ranges[h - 1]
@@ -513,6 +513,7 @@ def build_layout_juz(txt, shrink):
             book.append(dict(hizb=hizb_of(txt, pa[0], hz), juz=j + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
+    book = opening_pages(txt, W) + book   # pages 1 and 2
     a0, a1 = juz_ranges()[29]
     for pa in juz30_pages(txt, txt.flat[a0 - 1:a1 - 1], JUZ30_PAGES_AS_JUZ, W, shrink, JUZ30_MAX_STRETCH, TITLE_RULE):
         book.append(dict(hizb=hizb_of(txt, pa[0], hz), juz=30, ayahs=pa,
@@ -532,7 +533,7 @@ def layout_stats(txt, book, W):
     hz, jz = hizb_ranges(), juz_ranges()
     body = []
     for i, p in enumerate(book):
-        if in_juz30(p):
+        if in_juz30(p) or p.get("opening"):
             continue
         s = [W / r[2] for r in p["rows"] if r[0] == "text"]
         k = [x for x in s if x <= 1.8]
@@ -544,7 +545,7 @@ def layout_stats(txt, book, W):
     sq = lambda v: float(math.sqrt(v))
     fill = [float(np.exp(b[3]).mean()) for b in body]
     lo, hi = int(np.argmin(fill)), int(np.argmax(fill))
-    first = {txt.flat.index(p["ayahs"][0]) + 1 for p in book} | {1}  # the opening spread starts juz 1 and hizb 1
+    first = {txt.flat.index(p["ayahs"][0]) + 1 for p in book}
     titles = [k + 1 for p in book for k, r in enumerate(p["rows"]) if r[0] == "title"]
 
     def where(b):
@@ -1044,12 +1045,12 @@ def render_page(pdf, txt, page, number, W, stats):
     g, w = plain(txt, txt.suras[s0 - 1]["title"])
     out.append(f"q {rgb(GREEN)}")
     lab = k * 0.55
-    if not page.get("opening"):  # the opening pages carry no running heads, only their letter
+    if not page.get("opening"):  # the opening pages carry no running heads, only their number
         place(g, x0 + BLOCK_W - w * small, head_y, small, 1.0, used, out)
         label = f"الجزء {ar_num((page['hizb'] + 1) // 2)}   الحزب {ar_num(page['hizb'])}"
         g, w = plain(txt, label, txt.label_font)
         place(g, x0, head_y, lab, 1.0, used, out, "A")
-    g, w = plain(txt, page.get("label") or ar_num(number), txt.label_font)
+    g, w = plain(txt, ar_num(number), txt.label_font)
     place(g, PAGE_W / 2 - w * lab / 2, foot_y, lab, 1.0, used, out, "A")
     out.append("Q")
     out.append(f"q {rgb(INK)}")
@@ -1145,22 +1146,15 @@ body { font-family: amiri; color: #17361f; text-align: center; margin: 0; }
 """
 
 
-def reading_order(path, cover, openings, first=1):
+def reading_order(path, cover, first=1):
     """An Arabic book: pages run right to left (/Direction /R2L), two at a time. With the
-    cover, it stands alone like a front cover and the opening spread follows ("ا" on the
-    right, "ب" on the left), then pages 1 | 2 and on, odd pages on the right as in the
-    print; without it, the opening spread comes first. Page labels: "cover", the opening
-    letters, then the page numbers."""
+    cover, it stands alone like a front cover and the opening spread follows (page 1 on
+    the right, page 2 on the left), then 3 | 4 and on, odd pages on the right as in the
+    print; without it, the opening spread comes first. Page labels: "cover", then the
+    page numbers."""
     import pymupdf
     doc = pymupdf.open(path)
-    utf16 = lambda t: "<FEFF" + t.encode("utf-16-be").hex().upper() + ">"   # PDF text string
-    nums, at = [], 0
-    if cover:
-        nums.append("0 << /P (cover) >>")
-        at = 1
-    for i, letter in enumerate(openings):
-        nums.append(f"{at + i} << /P {utf16(letter)} >>")
-    nums.append(f"{at + len(openings)} << /S /D /St {first} >>")
+    nums = ["0 << /P (cover) >>", f"1 << /S /D /St {first} >>"] if cover else [f"0 << /S /D /St {first} >>"]
     cat = doc.pdf_catalog()
     doc.xref_set_key(cat, "PageLabels", "<< /Nums [ " + " ".join(nums) + " ] >>")
     doc.xref_set_key(cat, "ViewerPreferences", "<< /Direction /R2L >>")
@@ -1232,9 +1226,6 @@ def main():
     pdf = Pdf()
     stats = dict(ratios=[], xscale=[], centred=0, collisions=[], cleared=0, ink=InkCheck(FONT_PATH),
                  art=None if args.art == "none" else args.art)
-    openings = opening_pages(txt, W) if lo == 1 else []
-    for page in openings:
-        render_page(pdf, txt, page, 0, W, stats)
     for n in range(lo, hi + 1):
         render_page(pdf, txt, book[n - 1], n, W, stats)
         if n % 50 == 0:
@@ -1244,7 +1235,7 @@ def main():
         apply_art(args.out, pdf.art, args.art)
     if not args.no_cover and lo == 1:
         add_cover(args.out, args.unit, args.art)
-    reading_order(args.out, cover=not args.no_cover and lo == 1, openings=[p["label"] for p in openings], first=lo)
+    reading_order(args.out, cover=not args.no_cover and lo == 1, first=lo)
     r, xs = np.array(stats["ratios"]), np.array(stats["xscale"])
     # checks: every page ends on an ayah marker, no line starts with one
     ends_ok = all(p["rows"][-1][0] == "text" and MARK in p["rows"][-1][1][-1] for p in book)
@@ -1266,7 +1257,7 @@ def main():
                                   if header_lines(sn) + lines_needed([x for a in range(1, len(txt.suras[sn - 1]["ayas"]) + 1)
                                                                       for _, x in txt.units(sn, a)], W, txt.sp) <= LINES],
                within_page_spread=round(float(np.median([np.std(np.log([W / r[2] for r in p["rows"] if r[0] == "text" and W / r[2] <= 1.8]))
-                                                         for p in book if not in_juz30(p)])), 3),
+                                                         for p in book if not in_juz30(p) and not p.get("opening")])), 3),
                within_page_spread_madina_1441h=0.063,
                collisions_cleared_by_spacing=stats["cleared"],
                word_collisions=len(stats["collisions"]),

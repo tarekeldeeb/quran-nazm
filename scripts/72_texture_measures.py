@@ -77,7 +77,7 @@ def nazm_lines(txt):
     book, W, _ = R.build_layout(txt, 0.19, "juz")
     out = []
     for p in book:
-        if p.get("juz", 30) > 29:
+        if p.get("juz", 30) > 29 or p.get("opening"):
             continue
         for r in p["rows"]:
             if r[0] != "text" or W / r[2] > 1.8:

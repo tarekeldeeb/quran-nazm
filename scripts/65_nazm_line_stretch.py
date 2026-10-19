@@ -17,6 +17,6 @@ import render_mushaf as R
 txt = R.Text()
 book, W, _ = R.build_layout(txt, 0.19, "juz")  # the renderer's defaults
 pages = [dict(page=i, hizb=p["hizb"], juz=p["juz"], stretch=[round(W / r[2], 4) for r in p["rows"] if r[0] == "text"])
-         for i, p in enumerate(book, 1)]
+         for i, p in enumerate(book, 1) if not p.get("opening")]  # pages 1-2: the opening spread
 json.dump(dict(line_width=W, pages=pages), open(os.path.join(DATA, "nazm_line_stretch.json"), "w"))
 print(f"{len(pages)} pages written")

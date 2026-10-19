@@ -59,6 +59,8 @@ def nazm_pages(unit, shrink):
     book, W, _ = R.build_layout(txt, shrink, unit)
     out = []
     for p in book:
+        if p.get("opening"):  # pages 1-2, the opening spread, are not measured
+            continue
         s = [W / r[2] for r in p["rows"] if r[0] == "text"]
         out.append((unit_of(p["ayahs"][0], JZ), unit_of(p["ayahs"][0], HZ), [x for x in s if x <= 1.8]))
     return out, W, book
@@ -93,7 +95,7 @@ def alignment(book):
     """Hizbs and juz that start on the first line of a page (title rows count as the start)."""
     starts_h = {a0 for a0, _ in HZ}
     starts_j = {a0 for a0, _ in JZ}
-    top = [txt.flat.index(p["ayahs"][0]) + 1 for p in book] + [1]  # the opening spread starts juz 1 and hizb 1
+    top = [txt.flat.index(p["ayahs"][0]) + 1 for p in book]
     return dict(hizbs_at_page_top=sum(1 for a in starts_h if a in top),
                 juz_at_page_top=sum(1 for a in starts_j if a in top))
 

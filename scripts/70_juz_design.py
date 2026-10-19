@@ -30,7 +30,7 @@ import render_mushaf as R
 SIGMA = 0.19
 LW = 15437.6
 txt = R.Text()
-# juz 1 without the opening spread (Al-Fatiha, Al-Baqara 1-5), on its remaining 18 pages
+# juz 1 without the opening spread (pages 1-2: Al-Fatiha, Al-Baqara 1-5), on its remaining 18 pages
 JUZ, NPAGES = zip(*[R.drop_opening(txt.flat[a0 - 1:a1 - 1], R.PAGES_PER_JUZ) for a0, a1 in R.juz_ranges()])
 A66 = importlib.import_module("66_paper_ablations")
 
@@ -66,7 +66,9 @@ def stats(book, sigma=SIGMA, squeeze=True):
                spread_all=float(ls.std()),
                spread_between_pages=float(math.sqrt(np.mean([(m - jmean[p["juz"]]) ** 2 for p, m, k in zip(book, pm, keep) for _ in k]))),
                sparsest_page=max(fill), densest_page=min(fill),
-               sparsest_page_number=int(np.argmax(fill)) + 1, densest_page_number=int(np.argmin(fill)) + 1,
+               # page numbers of the book: the opening spread is pages 1 and 2
+               sparsest_page_number=int(np.argmax(fill)) + 1 + len(R.OPENING),
+               densest_page_number=int(np.argmin(fill)) + 1 + len(R.OPENING),
                lines_compressed=float((s < 1).mean()))
     if squeeze:
         xs = [R.justify(txt.font, " ".join(r[1]), W).x_scale for p in book for r in p["rows"] if r[0] == "text" and r[2] > W]
