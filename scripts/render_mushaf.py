@@ -237,6 +237,65 @@ def titles_ok(segs):
 
 
 PAGES_PER_JUZ = 20
+
+# The opening spread, as in every printed Mushaf: Al-Fatiha on page "ا" and Al-Baqara 1-5
+# on page "ب", each in a reduced block whose lines narrow towards its top and bottom. The
+# numbered pages start after it, so juz 1 holds Al-Baqara 6 to the end of the juz on its
+# 20 pages and juz k starts on page 20(k-1)+1. Line widths relative to the line width of
+# the book, from the shape of the print's opening pages.
+OPENING = {"ا": dict(ayahs=[(1, a) for a in range(1, 8)], shape=[0.47, 0.63, 0.82, 0.82, 0.78, 0.61, 0.36]),
+           "ب": dict(ayahs=[(2, a) for a in range(1, 6)], shape=[0.64, 0.81, 0.83, 0.80, 0.61, 0.37])}
+OPENING_AYAHS = {a for o in OPENING.values() for a in o["ayahs"]}
+OPENING_STRETCH = 1.07   # the book's median line stretch, kept on the opening lines
+
+
+def drop_opening(ayahs):
+    """A unit's ayahs without those of the opening spread."""
+    return [a for a in ayahs if a not in OPENING_AYAHS]
+
+
+def shaped_lines(ws, targets, sp):
+    """Cut a run of words into len(targets) lines whose natural widths best match the
+    target widths (least squared log stretch, all cuts chosen together)."""
+    m, n = len(ws), len(targets)
+    cum = np.concatenate([[0], np.cumsum(np.array(ws) + sp)])
+    INF = 1e30
+    best = np.full((n + 1, m + 1), INF)
+    back = np.zeros((n + 1, m + 1), int)
+    best[0][0] = 0
+    for k in range(1, n + 1):
+        for e in range(k, m - (n - k) + 1):
+            for st in range(k - 1, e):
+                if best[k - 1][st] >= INF:
+                    continue
+                c = best[k - 1][st] + math.log(targets[k - 1] / (cum[e] - cum[st] - sp)) ** 2
+                if c < best[k][e]:
+                    best[k][e], back[k][e] = c, st
+    cuts, k = [m], n
+    while k:
+        cuts.append(back[k][cuts[-1]])
+        k -= 1
+    cuts = cuts[::-1]
+    return list(zip(cuts[:-1], cuts[1:]))
+
+
+def opening_pages(txt, W):
+    """The two opening pages: title (and basmala), then lines of the opening shape. The
+    shape is scaled so its lines keep the book's median stretch, and never wider than W.
+    Text rows carry their own width as a fourth field."""
+    pages = []
+    for label, o in OPENING.items():
+        s = o["ayahs"][0][0]
+        units = [u for sa in o["ayahs"] for u in txt.units(*sa)]
+        ws = [w for _, w in units]
+        nat = sum(ws) + txt.sp * (len(ws) - 1)
+        scale = min(W / max(o["shape"]), nat * OPENING_STRETCH / sum(o["shape"]))
+        targets = [x * scale for x in o["shape"]]
+        rows = [("title", s)] + ([("basmala",)] if header_lines(s) == 2 else []) + [("gap",)]
+        for (a, b), t in zip(shaped_lines(ws, targets, txt.sp), targets):
+            rows.append(("text", [u for u, _ in units[a:b]], sum(ws[a:b]) + txt.sp * (b - a - 1), t))
+        pages.append(dict(label=label, opening=True, ayahs=o["ayahs"], hizb=1, juz=1, rows=rows))
+    return pages
 JUZ30_PAGES_AS_JUZ = 24  # --unit juz: juz 30 cannot fit 20 pages under the title rule; 24 keeps the book at 604
 
 
@@ -426,7 +485,7 @@ def build_layout(txt, shrink, unit="juz"):
     book = []  # list of dict(hizb, ayahs, rows)
     for h in range(58):
         a0, a1 = ranges[h]
-        for pa in fixed_pages(txt, txt.flat[a0 - 1:a1 - 1], PAGES_PER_HIZB, TITLE_RULE):
+        for pa in fixed_pages(txt, drop_opening(txt.flat[a0 - 1:a1 - 1]), PAGES_PER_HIZB, TITLE_RULE):
             book.append(dict(hizb=h + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
@@ -445,7 +504,7 @@ def build_layout_juz(txt, shrink):
     hz = hizb_ranges()
     book = []
     for j, (a0, a1) in enumerate(juz_ranges()[:29]):
-        for pa in fixed_pages(txt, txt.flat[a0 - 1:a1 - 1], PAGES_PER_JUZ, TITLE_RULE):
+        for pa in fixed_pages(txt, drop_opening(txt.flat[a0 - 1:a1 - 1]), PAGES_PER_JUZ, TITLE_RULE):
             book.append(dict(hizb=hizb_of(txt, pa[0], hz), juz=j + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
@@ -662,6 +721,40 @@ def rounded_rect(x, y, w, h, r):
             f"{x+w:.2f} {y+h-r:.2f} l {x+w:.2f} {y+h-r+k:.2f} {x+w-r+k:.2f} {y+h:.2f} {x+w-r:.2f} {y+h:.2f} c "
             f"{x+r:.2f} {y+h:.2f} l {x+r-k:.2f} {y+h:.2f} {x:.2f} {y+h-r+k:.2f} {x:.2f} {y+h-r:.2f} c "
             f"{x:.2f} {y+r:.2f} l {x:.2f} {y+r-k:.2f} {x+r-k:.2f} {y:.2f} {x+r:.2f} {y:.2f} c h")
+
+
+def smooth_closed(pts):
+    """A closed Catmull-Rom curve through the points, as PDF Bezier segments."""
+    n = len(pts)
+    ops = [f"{pts[0][0]:.2f} {pts[0][1]:.2f} m"]
+    for i in range(n):
+        p0, p1, p2, p3 = pts[i - 1], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        ops.append(f"{c1[0]:.2f} {c1[1]:.2f} {c2[0]:.2f} {c2[1]:.2f} {p2[0]:.2f} {p2[1]:.2f} c")
+    return " ".join(ops) + " h"
+
+
+def opening_ornament(x0, top, pitch, rows, off, k):
+    """A double outline following the narrowing lines of an opening page, lightly
+    tinted, in the colour of the frame (the print draws a full ornament here)."""
+    cx = x0 + BLOCK_W / 2
+    first = next(i for i, r in enumerate(rows) if r[0] == "text") + off
+    text = [r for r in rows if r[0] == "text"]
+    out = []
+    for pad, wdt, fill in ((0.55 * pitch, 1.1, True), (0.38 * pitch, 0.45, False)):
+        right, left = [], []
+        for j, r in enumerate(text):
+            y = top - (first + j + 0.5) * pitch
+            hw = r[3] * k / 2 + pad
+            right.append((cx + hw, y))
+            left.append((cx - hw, y))
+        y_top, y_bot = top - first * pitch + pad * 0.6, top - (first + len(text)) * pitch - pad * 0.6
+        pts = [(cx, y_top)] + right + [(cx, y_bot)] + left[::-1]
+        paint = f"{rgb((0.93, 0.96, 0.94))} {rgb(GREEN, True)} {wdt} w " + smooth_closed(pts) + " B" if fill \
+            else f"{rgb(GREEN, True)} {wdt} w " + smooth_closed(pts) + " S"
+        out.append(f"q {paint} Q")
+    return " ".join(out)
 
 
 def star8(cx, cy, r):
@@ -945,16 +1038,22 @@ def render_page(pdf, txt, page, number, W, stats):
     small = k * 0.62
     g, w = plain(txt, txt.suras[s0 - 1]["title"])
     out.append(f"q {rgb(GREEN)}")
-    place(g, x0 + BLOCK_W - w * small, head_y, small, 1.0, used, out)
-    label = f"الجزء {ar_num((page['hizb'] + 1) // 2)}   الحزب {ar_num(page['hizb'])}"
     lab = k * 0.55
-    g, w = plain(txt, label, txt.label_font)
-    place(g, x0, head_y, lab, 1.0, used, out, "A")
-    g, w = plain(txt, ar_num(number), txt.label_font)
+    if not page.get("opening"):  # the opening pages carry no running heads, only their letter
+        place(g, x0 + BLOCK_W - w * small, head_y, small, 1.0, used, out)
+        label = f"الجزء {ar_num((page['hizb'] + 1) // 2)}   الحزب {ar_num(page['hizb'])}"
+        g, w = plain(txt, label, txt.label_font)
+        place(g, x0, head_y, lab, 1.0, used, out, "A")
+    g, w = plain(txt, page.get("label") or ar_num(number), txt.label_font)
     place(g, PAGE_W / 2 - w * lab / 2, foot_y, lab, 1.0, used, out, "A")
     out.append("Q")
     out.append(f"q {rgb(INK)}")
+    opening = page.get("opening", False)
+    off = (LINES - len(page["rows"])) // 2 if opening else 0   # the opening block sits mid-page
+    if opening:
+        out.append("Q " + opening_ornament(x0, top, pitch, page["rows"], off, k) + f" q {rgb(INK)}")
     for i, row in enumerate(page["rows"]):
+        i += off
         ytop = top - i * pitch
         base = ytop - BASELINE_IN_ROW * pitch
         if row[0] == "title":
@@ -973,11 +1072,18 @@ def render_page(pdf, txt, page, number, W, stats):
             place(g, x0 + BLOCK_W / 2 - w * s / 2, ytop - pitch / 2 - 0.22 * pitch, s, 1.0, used, out)
             pdf.outlines.append((txt.suras[row[1] - 1]["title"], len(pdf.pages)))
             continue
+        if row[0] == "gap":
+            continue
         if row[0] == "basmala":
             g, w = plain(txt, txt.basmala)
             place(g, x0 + BLOCK_W / 2 - w * k / 2, base, k, 1.0, used, out)
             continue
         text, nat = " ".join(row[1]), row[2]
+        if opening:  # a line of the opening shape: its own width, centred
+            r = justify(txt.font, text, row[3])
+            g, x = line_glyphs(txt.font, text, r)
+            place(g, x0 + BLOCK_W / 2 + row[3] * k / 2 - x * r.x_scale * k, base, k, r.x_scale, used, out)
+            continue
         ratio = W / nat
         if ratio > 1.8:  # a few words left over before a surah ends: centre them, do not over-stretch
             target = nat * 1.25
@@ -1034,11 +1140,37 @@ body { font-family: amiri; color: #17361f; text-align: center; margin: 0; }
 """
 
 
+def reading_order(path, cover, openings, first=1):
+    """An Arabic book: pages run right to left (/Direction /R2L), two at a time. With the
+    cover, it stands alone like a front cover and the opening spread follows ("ا" on the
+    right, "ب" on the left), then pages 1 | 2 and on, odd pages on the right as in the
+    print; without it, the opening spread comes first. Page labels: "cover", the opening
+    letters, then the page numbers."""
+    import pymupdf
+    doc = pymupdf.open(path)
+    utf16 = lambda t: "<FEFF" + t.encode("utf-16-be").hex().upper() + ">"   # PDF text string
+    nums, at = [], 0
+    if cover:
+        nums.append("0 << /P (cover) >>")
+        at = 1
+    for i, letter in enumerate(openings):
+        nums.append(f"{at + i} << /P {utf16(letter)} >>")
+    nums.append(f"{at + len(openings)} << /S /D /St {first} >>")
+    cat = doc.pdf_catalog()
+    doc.xref_set_key(cat, "PageLabels", "<< /Nums [ " + " ".join(nums) + " ] >>")
+    doc.xref_set_key(cat, "ViewerPreferences", "<< /Direction /R2L >>")
+    # in a right-to-left two-page view, TwoPageRight shows page 1 of the file alone and
+    # TwoPageLeft pairs it with page 2
+    doc.xref_set_key(cat, "PageLayout", "/TwoPageRight" if cover else "/TwoPageLeft")
+    tmp = path + ".tmp"
+    doc.save(tmp, garbage=3, deflate=True)
+    doc.close()
+    os.replace(tmp, path)
+
+
 def add_cover(path, unit, style):
-    """Put a static cover before page 1: the project in a few lines, Arabic and English.
-    The PDF opens two pages at a time with its first page on the left, so a two-page
-    viewer shows the cover on the left and page 1 on the right; page labels keep "1"
-    on the Mushaf's first page."""
+    """Put a static cover before the Mushaf: the project in a few lines, Arabic and
+    English; reading_order() then makes it stand alone like a front cover."""
     import pymupdf
     doc = pymupdf.open(path)
     cover = doc.new_page(0, width=PAGE_W, height=PAGE_H)
@@ -1066,11 +1198,6 @@ Frame and surah headers: quran-assets by quran.ws (CC BY-NC-SA 4.0). Running hea
 """
     cover.insert_htmlbox(pymupdf.Rect(20 * MM, 62 * MM, PAGE_W - 20 * MM, PAGE_H - 22 * MM), body,
                          css=COVER_CSS, archive=arch)
-    doc.set_page_labels([dict(startpage=0, prefix="cover", style="", firstpagenum=1),
-                         dict(startpage=1, style="D", firstpagenum=1)])
-    cat = doc.pdf_catalog()
-    doc.xref_set_key(cat, "ViewerPreferences", "null")  # no right-to-left swap of the spread
-    doc.xref_set_key(cat, "PageLayout", "/TwoPageLeft")  # first page on the left: cover | page 1
     tmp = path + ".tmp"
     doc.save(tmp, garbage=3, deflate=True)
     doc.close()
@@ -1086,7 +1213,7 @@ def main():
     ap.add_argument("--art", default="hafs-adi", choices=sorted(ART_STYLES) + ["none"],
                     help="page frame and surah header art from assets/art (default hafs-adi; 'none' draws the built-in vector art)")
     ap.add_argument("--no-cover", action="store_true",
-                    help="leave out the cover page (and keep right-to-left page order for two-page viewers)")
+                    help="leave out the cover page (the opening spread then comes first)")
     ap.add_argument("--pages", default=None, help="page range to render, e.g. 1-20 (layout is always computed for the whole book)")
     args = ap.parse_args()
     t0 = time.time()
@@ -1100,6 +1227,9 @@ def main():
     pdf = Pdf()
     stats = dict(ratios=[], xscale=[], centred=0, collisions=[], cleared=0, ink=InkCheck(FONT_PATH),
                  art=None if args.art == "none" else args.art)
+    openings = opening_pages(txt, W) if lo == 1 else []
+    for page in openings:
+        render_page(pdf, txt, page, 0, W, stats)
     for n in range(lo, hi + 1):
         render_page(pdf, txt, book[n - 1], n, W, stats)
         if n % 50 == 0:
@@ -1109,6 +1239,7 @@ def main():
         apply_art(args.out, pdf.art, args.art)
     if not args.no_cover and lo == 1:
         add_cover(args.out, args.unit, args.art)
+    reading_order(args.out, cover=not args.no_cover and lo == 1, openings=[p["label"] for p in openings], first=lo)
     r, xs = np.array(stats["ratios"]), np.array(stats["xscale"])
     # checks: every page ends on an ayah marker, no line starts with one
     ends_ok = all(p["rows"][-1][0] == "text" and MARK in p["rows"][-1][1][-1] for p in book)
