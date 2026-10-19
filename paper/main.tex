@@ -13,7 +13,7 @@
 \definecolor{nazm}{HTML}{2F6B55}
 \definecolor{madina}{HTML}{C2412D}
 \newcommand{\x}{\ensuremath{\times}}
-\newcommand{\paperversion}{v0.4.1}% bump on each revision
+\newcommand{\paperversion}{v0.4.2}% bump on each revision
 
 \settopmatter{printacmref=false}
 \setcopyright{none}
@@ -47,8 +47,8 @@ Printed Qurans are organised in reading units (the juz, the hizb and its quarter
     \caption{Madina 1441\,H print, page 156.}
   \end{subfigure}\hspace{8mm}%
   \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p153.pdf}
-    \caption{Quran-Nazm, page 153.}
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p155.pdf}
+    \caption{Quran-Nazm, page 155.}
   \end{subfigure}
   \Description{Two Quran pages side by side, both starting at the same ayah. Both pages sit in the same green Madina frame at the same size. The printed page has crowded lines at the top and spaced-out lines at the bottom; the Nazm page has evenly filled lines.}
   \caption{The same passage, from Al-A'raf 44, in the Madina print and in Quran-Nazm. In the print, line~11 carries 25\% more text than fits at natural size while the lowest lines are spaced out; in Nazm the lines of a page carry equal shares of text. For a fair comparison both text blocks are shown in the same Hafs frame at the same size (the print's text block is taken from the King Fahd Complex PDF~\cite{scan}), so only the setting differs.}
@@ -294,7 +294,7 @@ where $\pi$ penalises a cut inside a surah short enough for one page, subject to
 over word boundaries. Both problems are solved exactly by dynamic programming, in the spirit of Knuth and Plass~\cite{knuth1981}, with a sum-of-squares cost. All widths are HarfBuzz advances in the DigitalKhatt font; the method never counts words or letters. Hizb boundaries play no part: they fall wherever the text puts them and only label the running heads.
 
 \subsection{The opening spread}\label{sec:opening}
-Every printed Mushaf opens with a decorated spread: Al-Fatiha on the right page and Al-Baqara 1--5 on the left, each in a small block whose lines narrow towards its top and bottom, inside a larger ornament. Nazm keeps this tradition. The two pages are labelled \emph{alif} and \emph{b\=a'}, and the page numbers start after them, so that page~1 is the first full page, Al-Baqara~6. The spread counts as two of juz~1's twenty pages: the rest of juz~1 takes 18 full pages, and the book has 602 numbered pages, 604 in all, like the print. On each opening page the line widths follow the shape of the print's (from 36\% to 83\% of the line width), scaled so the lines keep the book's median stretch of 1.07\x, and the line breaks are chosen by dynamic programming to fit that shape. The opening ornament of quran-assets is not yet traced, so Nazm draws a double outline that follows the lines. With twenty full pages, juz~1 would have been the sparsest juz of the book (mean stretch 1.16\x); with eighteen it is 1.04\x, near the median of 1.08\x.
+Every printed Mushaf opens with a decorated spread: Al-Fatiha on the right page and Al-Baqara 1--5 on the left, each in a small block whose lines narrow towards its top and bottom, inside a larger ornament. Nazm keeps this tradition. The spread is pages~1 and~2 and counts as two of juz~1's twenty pages: the rest of juz~1, from Al-Baqara~6, takes the 18 full pages 3--20, so juz~2 still starts on page~21 and the book has 604 pages, like the print. On each opening page the line widths follow the shape of the print's (from 36\% to 83\% of the line width), scaled so the lines keep the book's median stretch of 1.07\x, and the line breaks are chosen by dynamic programming to fit that shape. The opening ornament of quran-assets is not yet traced, so Nazm draws a double outline that follows the lines. With twenty full pages, juz~1 would have been the sparsest juz of the book (mean stretch 1.16\x); with eighteen it is 1.04\x, near the median of 1.08\x.
 
 \subsection{Surah titles}\label{sec:titles}
 A surah title may start no lower than line 11 of a page. Below that, a surah opens with one or two lines at the foot of a page and then breaks, a shape readers notice. In hizbs 1--58 the rule is enforced on the page cuts: a cut that would put a title lower is not allowed, so the search moves the surah to the top of the next page instead. In juz 30, where up to three short surahs share a page, the lines of a page are also shared with the rule in mind: an earlier surah never takes a line that would push a later title below line 11, though each surah keeps the lines it needs within the compression limit.
@@ -326,16 +326,16 @@ How a line is compressed matters more than how much. DigitalKhatt has rich elong
 \begin{figure*}[t]
   \centering
   \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p599.pdf}
-    \caption{Page 599: Al-`Asr, Al-Humaza, Al-Fil.}
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p601.pdf}
+    \caption{Page 601: Al-`Asr, Al-Humaza, Al-Fil.}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-beh.pdf}
-    \caption{Page \emph{b\=a'}: Al-Baqara 1--5.}
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p002.pdf}
+    \caption{Page 2: Al-Baqara 1--5.}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.3\textwidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-alef.pdf}
-    \caption{Page \emph{alif}: Al-Fatiha.}
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p001.pdf}
+    \caption{Page 1: Al-Fatiha.}
   \end{subfigure}
   \Description{Three typeset Quran pages in the green Madina page frame. The left page holds three short surahs, the third title on line 11. The middle and right pages are the opening spread: a surah header above a lens-shaped block of narrowing lines.}
   \caption{Quran-Nazm pages. Right: the opening spread, read right to left, Al-Fatiha and Al-Baqara 1--5 in blocks whose lines narrow towards top and bottom, as in the print. Left: a page of juz 30. Each surah begins on a new line under its header, no title below line~11; every page ends on an ayah.}
@@ -392,7 +392,7 @@ Quran-Nazm~\cite{nazm} is a single Python program, \texttt{render\_mushaf.py}, b
 
 \paragraph{Ink check.} Every set line is tested for ink contact between neighbouring words: glyph boxes that intersect are rasterised at 5 font units per pixel and compared pixel by pixel. Four contacts in the book, of the kind where a small pause mark meets the tall stroke of a following kaf, are cleared by widening only that space and refitting the line.
 
-\paragraph{Output.} A minimal PDF writer stores each glyph outline once as a form object shared by all pages and places it by matrix, which keeps the book, 602 numbered pages and the opening spread, at 11\,MB with vector text. The page frame and surah header are the Hafs al-`Adi vector ornaments of quran-assets~\cite{quranassets}, traced from the Complex's standard Hafs print: each SVG has a transparent slot, the frame's slot is stretched over the text block and the header's holds the surah name, and both are laid under the text as shared form objects. Running heads use Amiri Quran~\cite{amiri}. A static cover, with a short description of the project in Arabic and English, precedes the opening spread. As an Arabic book the file is marked to read right to left (\texttt{/Direction /R2L}) two pages at a time, with the cover alone like a front cover; a two-page viewer then shows the opening spread with Al-Fatiha on the right, and every odd page on the right, as in the print. Page labels name the opening pages \emph{alif} and \emph{b\=a'} and number the rest from~1. Every run also writes a statistics summary, the measures of Section~\ref{sec:results} beside those of the print, so that a reader who changes a parameter sees its effect at once. The whole Mushaf renders in about four minutes on a laptop-class CPU, and a re-run reproduces the published statistics exactly.
+\paragraph{Output.} A minimal PDF writer stores each glyph outline once as a form object shared by all pages and places it by matrix, which keeps the 604-page book at 11\,MB with vector text. The page frame and surah header are the Hafs al-`Adi vector ornaments of quran-assets~\cite{quranassets}, traced from the Complex's standard Hafs print: each SVG has a transparent slot, the frame's slot is stretched over the text block and the header's holds the surah name, and both are laid under the text as shared form objects. Running heads use Amiri Quran~\cite{amiri}. A static cover, with a short description of the project in Arabic and English, precedes the opening spread. As an Arabic book the file is marked to read right to left (\texttt{/Direction /R2L}) two pages at a time, with the cover alone like a front cover; a two-page viewer then shows the opening spread with Al-Fatiha on the right, and every odd page on the right, as in the print. Page labels number the Mushaf from~1, after the cover. Every run also writes a statistics summary, the measures of Section~\ref{sec:results} beside those of the print, so that a reader who changes a parameter sees its effect at once. The whole Mushaf renders in about four minutes on a laptop-class CPU, and a re-run reproduces the published statistics exactly.
 
 \section{Evaluation}\label{sec:results}
 All comparisons with the print are measured the same way, on juz 1--29. Juz~30 is left out of every comparison: its 37 surahs each open on a new line under a header, so its pages are shaped by titles rather than by text width, and every layout, the print included, treats it as an exception (Nazm gives it 24 pages); Section~\ref{sec:extremes} reports it separately. The opening spread is left out for the same reason. The stretch of a line is the line width over its natural width, shaped unstretched in DigitalKhatt; for the print, its own full lines; for Nazm, its layout, with centred lines left out. Spreads are standard deviations of $\log s_\ell$; as the line width multiplies every line alike, they do not depend on the type size.
@@ -545,19 +545,19 @@ Fixing every juz to twenty pages moves the root variance of Section~\ref{sec:uni
 \end{figure}
 
 \subsection{Surah titles, extremes and juz 30}\label{sec:extremes}
-\paragraph{The title rule.} Without it, 11 surah titles of juz 1--29 would sit on line 12 or 13. The rule moves page breaks on 107 pages, since a moved break shifts the rest of its juz, but changes no spread (0.039 within a page, 0.047 between pages) and lowers the sparsest page from 1.38\x{} to 1.32\x: without the rule the sparsest page of the book (page~479) is one where a surah opens at its foot.
+\paragraph{The title rule.} Without it, 11 surah titles of juz 1--29 would sit on line 12 or 13. The rule moves page breaks on 107 pages, since a moved break shifts the rest of its juz, but changes no spread (0.039 within a page, 0.047 between pages) and lowers the sparsest page from 1.38\x{} to 1.32\x: without the rule the sparsest page of the book (page~481) is one where a surah opens at its foot.
 
-\paragraph{Extremes.} Fig.~\ref{fig:extremes} shows the two extreme pages of juz 1--29. Page~119 (Al-Ma'ida 82--89) is the densest, at 0.88\x{} average stretch; its lines are narrowed by tighter spaces and some horizontal scaling. Page~43 (Al-Baqara 270--274) is the sparsest, at 1.32\x; its lines carry long elongations but no distortion. Both are milder than the extremes of the hizb design (0.78\x{} and 1.43\x) and of the print (0.81\x{} and 1.31\x{} measured the same way).
+\paragraph{Extremes.} Fig.~\ref{fig:extremes} shows the two extreme pages of juz 1--29. Page~121 (Al-Ma'ida 82--89) is the densest, at 0.88\x{} average stretch; its lines are narrowed by tighter spaces and some horizontal scaling. Page~45 (Al-Baqara 270--274) is the sparsest, at 1.32\x; its lines carry long elongations but no distortion. Both are milder than the extremes of the hizb design (0.78\x{} and 1.43\x) and of the print (0.81\x{} and 1.31\x{} measured the same way).
 
 \begin{figure}[t]
   \centering
   \begin{subfigure}[b]{0.48\linewidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p119.pdf}
-    \caption{Page 119, densest.}
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p121.pdf}
+    \caption{Page 121, densest.}
   \end{subfigure}\hfill
   \begin{subfigure}[b]{0.48\linewidth}\centering
-    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p043.pdf}
-    \caption{Page 43, sparsest.}
+    \includegraphics[width=\linewidth,trim=40 40 40 40,clip]{figures/nazm-p045.pdf}
+    \caption{Page 45, sparsest.}
   \end{subfigure}
   \Description{Two Nazm pages side by side: on the left a dense page whose lines are slightly compressed, on the right a sparse page with long letter elongations.}
   \caption{The two extreme pages of juz 1--29 in Nazm.}

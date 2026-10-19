@@ -230,14 +230,13 @@ save(fig, "fig_page_drift.pdf")
 
 # 5. Pages of the Nazm render as vector PDF pages, and crops of the Madina print
 src = pymupdf.open(os.path.join(ROOT, "output", "quran-nazm.pdf"))
-import pypdf  # noqa: E402  (decodes the PDF's Arabic page labels)
+import pypdf  # noqa: E402  (reads the PDF's page labels)
 by_label = {lab: i for i, lab in enumerate(pypdf.PdfReader(os.path.join(ROOT, "output", "quran-nazm.pdf")).page_labels)}
 fig_pages = data("paper_pages.json")  # page labels used by the paper, chosen from the layout
-names = {"ا": "alef", "ب": "beh"}
 for lab in sorted(set(fig_pages.values())):
     one = pymupdf.open()
     one.insert_pdf(src, from_page=by_label[lab], to_page=by_label[lab])
-    name = f"nazm-{names[lab]}.pdf" if lab in names else f"nazm-p{int(lab):03d}.pdf"
+    name = f"nazm-p{int(lab):03d}.pdf"
     one.save(os.path.join(OUT, name))
     print("figure:", name)
 # 5b. The print's page 156 inside the same Hafs frame as the Nazm pages, for a fair side-by-side view:

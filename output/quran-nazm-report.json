@@ -1,6 +1,6 @@
 {
- "pages": 602,
- "rendered": "1-602",
+ "pages": 604,
+ "rendered": "1-604",
  "shrink_limit": 0.19,
  "line_width_units": 16636,
  "type_size_vs_madina": 0.928,
@@ -40,14 +40,14 @@
   1.164
  ],
  "densest_page": [
-  "page 119 (5:82-5:89)",
+  "page 121 (5:82-5:89)",
   0.882
  ],
  "sparsest_page": [
-  "page 43 (2:270-2:274)",
+  "page 45 (2:270-2:274)",
   1.324
  ],
- "hizbs_starting_a_page": 33,
- "juz_starting_a_page": 29,
+ "hizbs_starting_a_page": 34,
+ "juz_starting_a_page": 30,
  "titles_below_line_11": 0
 }
