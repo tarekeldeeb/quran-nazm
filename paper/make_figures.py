@@ -230,14 +230,16 @@ save(fig, "fig_page_drift.pdf")
 
 # 5. Pages of the Nazm render as vector PDF pages, and crops of the Madina print
 src = pymupdf.open(os.path.join(ROOT, "output", "quran-nazm.pdf"))
-labels = src.get_page_labels()
-shift = 1 if labels and labels[0].get("prefix") == "cover" else 0  # the cover is PDF page 1
-fig_pages = data("paper_pages.json")  # Mushaf page numbers used by the paper, chosen from the layout
-for n in sorted(set(fig_pages.values())):
+import pypdf  # noqa: E402  (decodes the PDF's Arabic page labels)
+by_label = {lab: i for i, lab in enumerate(pypdf.PdfReader(os.path.join(ROOT, "output", "quran-nazm.pdf")).page_labels)}
+fig_pages = data("paper_pages.json")  # page labels used by the paper, chosen from the layout
+names = {"ا": "alef", "ب": "beh"}
+for lab in sorted(set(fig_pages.values())):
     one = pymupdf.open()
-    one.insert_pdf(src, from_page=n - 1 + shift, to_page=n - 1 + shift)
-    one.save(os.path.join(OUT, f"nazm-p{n:03d}.pdf"))
-    print("figure:", f"nazm-p{n:03d}.pdf")
+    one.insert_pdf(src, from_page=by_label[lab], to_page=by_label[lab])
+    name = f"nazm-{names[lab]}.pdf" if lab in names else f"nazm-p{int(lab):03d}.pdf"
+    one.save(os.path.join(OUT, name))
+    print("figure:", name)
 # 5b. The print's page 156 inside the same Hafs frame as the Nazm pages, for a fair side-by-side view:
 # the text block of the scan is placed where Nazm's text block sits, under the same quran-assets frame.
 sys.path.insert(0, os.path.join(ROOT, "scripts"))

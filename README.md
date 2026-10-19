@@ -19,6 +19,7 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the pap
 ## The rules
 
 - **Every juz fills exactly 20 pages** of 15 lines; juz 30, with its 37 short surahs, the one exception, fills 24. Hizbs start wherever the text puts them.
+- **The opening spread of the print**: Al-Fatiha on page ا and Al-Baqara 1–5 on page ب, each in a block of narrowing lines. They are two of juz 1's twenty pages, so the rest of juz 1 takes 18 full pages and page numbers start at 1 with Al-Baqara 6.
 - **Every page ends with an ayah number**, and no line starts with an ayah marker.
 - **Each juz is set as one unstretched line**, cut into 20 equal pages at ayah ends, then each page into 15 equal lines at word boundaries, balancing shaped text widths. Both sets of cuts are chosen by dynamic programming.
 - **Every surah starts on a new line** under its header, and short surahs are kept whole on one page wherever page balance allows.
@@ -28,7 +29,7 @@ Full evidence and decisions: [`docs/findings.md`](docs/findings.md), and the pap
 
 ## Output
 
-[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages (the same count as the print), 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print. A static cover with a short description comes first, and the file opens two pages at a time, so a two-page viewer shows the cover on the left and page 1 on the right (`--no-cover` leaves it out). [`output/quran-nazm-summary.txt`](output/quran-nazm-summary.txt) is the short statistics summary every run prints, beside the print's values. Page frames and surah headers use the Hafs al-'Adi vector art from [quran-assets](https://quran.ws/blocks/quran-assets). [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
+[`output/quran-nazm.pdf`](output/quran-nazm.pdf): 604 pages like the print (the opening spread ا ب and 602 numbered pages), 145 × 210 mm, vector text, one bookmark per surah, type at 93% of the Madina print. A static cover with a short description comes first (`--no-cover` leaves it out). The file is marked as a right-to-left book and opens two pages at a time: the cover alone, then the opening spread with Al-Fatiha on the right, then pages 1 | 2 and on, odd pages on the right as in the print. [`output/quran-nazm-summary.txt`](output/quran-nazm-summary.txt) is the short statistics summary every run prints, beside the print's values. Page frames and surah headers use the Hafs al-'Adi vector art from [quran-assets](https://quran.ws/blocks/quran-assets). [`output/quran-nazm-report.json`](output/quran-nazm-report.json) records the statistics and the rule checks of each render; the renderer is deterministic.
 
 To generate it yourself, see [`docs/RENDERING.md`](docs/RENDERING.md). In short:
 

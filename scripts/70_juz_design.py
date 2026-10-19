@@ -30,14 +30,15 @@ import render_mushaf as R
 SIGMA = 0.19
 LW = 15437.6
 txt = R.Text()
-JUZ = [txt.flat[a0 - 1:a1 - 1] for a0, a1 in R.juz_ranges()]
+# juz 1 without the opening spread (Al-Fatiha, Al-Baqara 1-5), on its remaining 18 pages
+JUZ, NPAGES = zip(*[R.drop_opening(txt.flat[a0 - 1:a1 - 1], R.PAGES_PER_JUZ) for a0, a1 in R.juz_ranges()])
 A66 = importlib.import_module("66_paper_ablations")
 
 
 def body(page_fn=R.fixed_pages, title_rule=True):
     book = []
     for j, ay in enumerate(JUZ[:29]):
-        cuts = page_fn(txt, ay, R.PAGES_PER_JUZ, title_rule) if page_fn is R.fixed_pages else page_fn(txt, ay, R.PAGES_PER_JUZ)
+        cuts = page_fn(txt, ay, NPAGES[j], title_rule) if page_fn is R.fixed_pages else page_fn(txt, ay, NPAGES[j])
         book += [dict(juz=j + 1, ayahs=pa, rows=R.page_rows(txt, pa)) for pa in cuts]
     return book
 
@@ -103,7 +104,7 @@ def juz30(W, sigma, rule, exempt=False, pages=R.JUZ30_PAGES_AS_JUZ, cap=R.JUZ30_
 def solve(args):
     j, W, sigma = args
     hz = J.Hizb(txt, JUZ[j])
-    return j, J.best_pages(hz, W, sigma, pages=R.PAGES_PER_JUZ)[1]
+    return j, J.best_pages(hz, W, sigma, pages=NPAGES[j])[1]
 
 
 def main():

@@ -240,18 +240,23 @@ PAGES_PER_JUZ = 20
 
 # The opening spread, as in every printed Mushaf: Al-Fatiha on page "ا" and Al-Baqara 1-5
 # on page "ب", each in a reduced block whose lines narrow towards its top and bottom. The
-# numbered pages start after it, so juz 1 holds Al-Baqara 6 to the end of the juz on its
-# 20 pages and juz k starts on page 20(k-1)+1. Line widths relative to the line width of
-# the book, from the shape of the print's opening pages.
+# spread counts as two of juz 1's twenty pages, so the rest of juz 1 (Al-Baqara 6 on) takes
+# 18 full pages and the numbered pages 1, 2, ... start after it, as in the print (602
+# numbered pages + the spread). Line widths relative to the line width of the book, from
+# the shape of the print's opening pages.
 OPENING = {"ا": dict(ayahs=[(1, a) for a in range(1, 8)], shape=[0.47, 0.63, 0.82, 0.82, 0.78, 0.61, 0.36]),
            "ب": dict(ayahs=[(2, a) for a in range(1, 6)], shape=[0.64, 0.81, 0.83, 0.80, 0.61, 0.37])}
 OPENING_AYAHS = {a for o in OPENING.values() for a in o["ayahs"]}
 OPENING_STRETCH = 1.07   # the book's median line stretch, kept on the opening lines
 
 
-def drop_opening(ayahs):
-    """A unit's ayahs without those of the opening spread."""
-    return [a for a in ayahs if a not in OPENING_AYAHS]
+def drop_opening(ayahs, pages=None):
+    """A unit's ayahs without those of the opening spread; with `pages`, also the number
+    of full pages left to them (the spread takes two pages of the first unit)."""
+    rest = [a for a in ayahs if a not in OPENING_AYAHS]
+    if pages is None:
+        return rest
+    return rest, pages - (len(OPENING) if len(rest) < len(ayahs) else 0)
 
 
 def shaped_lines(ws, targets, sp):
@@ -296,7 +301,7 @@ def opening_pages(txt, W):
             rows.append(("text", [u for u, _ in units[a:b]], sum(ws[a:b]) + txt.sp * (b - a - 1), t))
         pages.append(dict(label=label, opening=True, ayahs=o["ayahs"], hizb=1, juz=1, rows=rows))
     return pages
-JUZ30_PAGES_AS_JUZ = 24  # --unit juz: juz 30 cannot fit 20 pages under the title rule; 24 keeps the book at 604
+JUZ30_PAGES_AS_JUZ = 24  # --unit juz: juz 30 cannot fit 20 pages under the title rule; 24 keeps the book at 604 sheets (602 numbered + the opening spread)
 
 
 def juz_ranges():
@@ -485,7 +490,7 @@ def build_layout(txt, shrink, unit="juz"):
     book = []  # list of dict(hizb, ayahs, rows)
     for h in range(58):
         a0, a1 = ranges[h]
-        for pa in fixed_pages(txt, drop_opening(txt.flat[a0 - 1:a1 - 1]), PAGES_PER_HIZB, TITLE_RULE):
+        for pa in fixed_pages(txt, *drop_opening(txt.flat[a0 - 1:a1 - 1], PAGES_PER_HIZB), TITLE_RULE):
             book.append(dict(hizb=h + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)
@@ -504,7 +509,7 @@ def build_layout_juz(txt, shrink):
     hz = hizb_ranges()
     book = []
     for j, (a0, a1) in enumerate(juz_ranges()[:29]):
-        for pa in fixed_pages(txt, drop_opening(txt.flat[a0 - 1:a1 - 1]), PAGES_PER_JUZ, TITLE_RULE):
+        for pa in fixed_pages(txt, *drop_opening(txt.flat[a0 - 1:a1 - 1], PAGES_PER_JUZ), TITLE_RULE):
             book.append(dict(hizb=hizb_of(txt, pa[0], hz), juz=j + 1, ayahs=pa, rows=page_rows(txt, pa)))
     longest = max(r[2] for p in book for r in p["rows"] if r[0] == "text")
     W = longest * (1 - shrink)

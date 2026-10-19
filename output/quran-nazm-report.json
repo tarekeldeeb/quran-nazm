@@ -1,15 +1,15 @@
 {
- "pages": 604,
- "rendered": "1-604",
+ "pages": 602,
+ "rendered": "1-602",
  "shrink_limit": 0.19,
  "line_width_units": 16636,
  "type_size_vs_madina": 0.928,
- "stretch_median": 1.07,
- "stretch_p5": 0.939,
- "stretch_p95": 1.226,
+ "stretch_median": 1.068,
+ "stretch_p5": 0.938,
+ "stretch_p95": 1.223,
  "stretch_max": 1.794,
- "lines_compressed": 0.2,
- "lines_squeezed": 0.144,
+ "lines_compressed": 0.207,
+ "lines_squeezed": 0.148,
  "squeeze_max": 0.183,
  "centred_lines": 5,
  "every_page_ends_on_ayah": true,
@@ -24,30 +24,30 @@
   98,
   100
  ],
- "within_page_spread": 0.04,
+ "within_page_spread": 0.039,
  "within_page_spread_madina_1441h": 0.063,
  "collisions_cleared_by_spacing": 4,
  "word_collisions": 0,
  "word_collision_examples": [],
  "spread_all_lines": 0.081,
  "spread_between_juz": 0.049,
- "spread_between_pages_of_a_juz": 0.048,
+ "spread_between_pages_of_a_juz": 0.047,
  "spread_within_a_page": 0.044,
- "neighbour_pages_median_difference": 0.04,
- "lines_off_10pct": 0.391,
+ "neighbour_pages_median_difference": 0.039,
+ "lines_off_10pct": 0.379,
  "juz_mean_stretch_range": [
   0.934,
   1.164
  ],
  "densest_page": [
-  "page 121 (5:82-5:89)",
+  "page 119 (5:82-5:89)",
   0.882
  ],
  "sparsest_page": [
-  "page 45 (2:270-2:274)",
+  "page 43 (2:270-2:274)",
   1.324
  ],
- "hizbs_starting_a_page": 34,
- "juz_starting_a_page": 30,
+ "hizbs_starting_a_page": 33,
+ "juz_starting_a_page": 29,
  "titles_below_line_11": 0
 }
