@@ -544,7 +544,7 @@ def layout_stats(txt, book, W):
     sq = lambda v: float(math.sqrt(v))
     fill = [float(np.exp(b[3]).mean()) for b in body]
     lo, hi = int(np.argmin(fill)), int(np.argmax(fill))
-    first = {txt.flat.index(p["ayahs"][0]) + 1 for p in book}
+    first = {txt.flat.index(p["ayahs"][0]) + 1 for p in book} | {1}  # the opening spread starts juz 1 and hizb 1
     titles = [k + 1 for p in book for k, r in enumerate(p["rows"]) if r[0] == "title"]
 
     def where(b):

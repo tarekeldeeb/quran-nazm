@@ -93,7 +93,7 @@ def alignment(book):
     """Hizbs and juz that start on the first line of a page (title rows count as the start)."""
     starts_h = {a0 for a0, _ in HZ}
     starts_j = {a0 for a0, _ in JZ}
-    top = [txt.flat.index(p["ayahs"][0]) + 1 for p in book]
+    top = [txt.flat.index(p["ayahs"][0]) + 1 for p in book] + [1]  # the opening spread starts juz 1 and hizb 1
     return dict(hizbs_at_page_top=sum(1 for a in starts_h if a in top),
                 juz_at_page_top=sum(1 for a in starts_j if a in top))
 
